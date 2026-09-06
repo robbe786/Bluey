@@ -1,0 +1,291 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+  <title>Poker Assistant 1-Tap</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; font-family: system-ui, -apple-system, sans-serif; }
+    
+    body { 
+      background-color: #121212; 
+      color: #fff; 
+      height: 100vh;
+      height: 100dvh; /* Risolve il problema delle barre a scomparsa di Chrome */
+      display: flex; 
+      flex-direction: column; 
+      overflow: hidden; 
+    }
+
+    #camera-container { 
+      flex: 1 1 auto; 
+      min-height: 0;
+      position: relative; 
+      background: #000; 
+      overflow: hidden; 
+      display: flex; 
+      justify-content: center; 
+      align-items: center; 
+    }
+
+    video { 
+      width: 100%; 
+      height: 100%; 
+      object-fit: cover; 
+    }
+
+    #overlay-box { 
+      position: absolute; 
+      border: 2px dashed rgba(255,255,255,0.4); 
+      width: 85%; 
+      height: 65%; 
+      pointer-events: none; 
+      border-radius: 8px; 
+    }
+
+    #result-panel { 
+      flex: 0 0 auto;
+      background: #1a1a1a; 
+      padding: 12px 16px 20px 16px; 
+      display: flex; 
+      flex-direction: column; 
+      align-items: center; 
+      gap: 10px;
+      border-top: 2px solid #333; 
+    }
+
+    #decision { 
+      font-size: 1.8rem; 
+      font-weight: 900; 
+      text-align: center; 
+      letter-spacing: 1px; 
+      color: #888; 
+    }
+
+    #details { 
+      font-size: 0.85rem; 
+      color: #ccc; 
+      width: 100%; 
+      text-align: left; 
+      line-height: 1.35; 
+      min-height: 2.8em;
+    }
+
+    #btn-action { 
+      width: 100%; 
+      padding: 16px; 
+      font-size: 1.2rem; 
+      font-weight: bold; 
+      color: white; 
+      background: #2563eb; 
+      border: none; 
+      border-radius: 12px; 
+      cursor: pointer; 
+      touch-action: manipulation;
+    }
+
+    #btn-action:active { background: #1d4ed8; }
+    #btn-action:disabled { background: #444; color: #888; cursor: not-allowed; }
+
+    .status-raise { color: #3b82f6 !important; }
+    .status-call { color: #10b981 !important; }
+    .status-fold { color: #ef4444 !important; }
+
+    #api-modal { 
+      position: fixed; 
+      inset: 0; 
+      background: rgba(0,0,0,0.92); 
+      display: flex; 
+      justify-content: center; 
+      align-items: center; 
+      padding: 20px; 
+      z-index: 100; 
+    }
+
+    .modal-content { 
+      background: #222; 
+      padding: 20px; 
+      border-radius: 12px; 
+      width: 100%; 
+      max-width: 350px; 
+      border: 1px solid #333;
+    }
+
+    .modal-content input { 
+      width: 100%; 
+      padding: 12px; 
+      margin: 12px 0; 
+      border-radius: 6px; 
+      border: 1px solid #444; 
+      background: #111; 
+      color: white; 
+      font-size: 0.95rem;
+    }
+
+    .modal-content button { 
+      width: 100%; 
+      padding: 12px; 
+      background: #2563eb; 
+      border: none; 
+      border-radius: 6px; 
+      color: white; 
+      font-weight: bold; 
+      font-size: 1rem;
+    }
+  </style>
+</head>
+<body>
+
+  <div id="api-modal">
+    <div class="modal-content">
+      <h3 style="font-size: 1.1rem;">Inserisci Gemini API Key</h3>
+      <input type="text" id="api-key-input" placeholder="Incolla chiave AQ... o AIzaSy...">
+      <button id="save-key-btn">Salva e Avvia</button>
+    </div>
+  </div>
+
+  <div id="camera-container">
+    <video id="video" autoplay playsinline muted></video>
+    <div id="overlay-box"></div>
+  </div>
+
+  <div id="result-panel">
+    <div id="decision">IN ATTESA</div>
+    <div id="details">Inquadra il tavolo e premi il pulsante blu.</div>
+    <button id="btn-action">SCATTA E DECIDI</button>
+  </div>
+
+  <canvas id="canvas" style="display: none;"></canvas>
+
+  <script>
+    const SYSTEM_PROMPT = `Sei un assistente real-time specializzato esclusivamente nelle decisioni di C-Bet post-flop per Spin & Go (€1, 3-max, stack <20 BB).
+Ad ogni immagine del tavolo che ricevi:
+1. Individua subito: le mie carte in basso, il board comune al flop, il piatto totale e il mio stack residuo in BB.
+2. Se sono l'aggressore pre-flop, valuta la texture del flop (vantaggio di range vs BB, dry/wet) e l'SPR:
+   - C-bet favorevole (es. Asso/Re alto, board disconnesso, out forti): indica puntata con sizing esatto (di norma small/min-bet ~33% pot o 1 BB).
+   - Check-behind (es. board connesso medio-basso, showdown value debole da controllare, zero fold equity).
+3. Se invece affronto una bet o mi trovo al turn/river, fornisci la linea di difesa/adattamento corretta.
+
+Fornisci SEMPRE la risposta in questo formato JSON esatto senza backtick o markdown:
+{
+  "mossa": "C-BET [X] BB" | "CHECK-BEHIND" | "CALL [X] BB" | "FOLD" | "CHECK",
+  "punto_1": "Motivazione tecnica 1 (Range advantage / texture flop)",
+  "punto_2": "Motivazione tecnica 2 (Pot odds / Equity / SPR)"
+}`;
+
+    const video = document.getElementById('video');
+    const canvas = document.getElementById('canvas');
+    const btnAction = document.getElementById('btn-action');
+    const decisionEl = document.getElementById('decision');
+    const detailsEl = document.getElementById('details');
+    const apiModal = document.getElementById('api-modal');
+    const apiKeyInput = document.getElementById('api-key-input');
+    const saveKeyBtn = document.getElementById('save-key-btn');
+
+    let apiKey = localStorage.getItem('GEMINI_API_KEY') || '';
+
+    if (apiKey) {
+      apiModal.style.display = 'none';
+      startCamera();
+    }
+
+    saveKeyBtn.onclick = () => {
+      apiKey = apiKeyInput.value.trim();
+      if (apiKey) {
+        localStorage.setItem('GEMINI_API_KEY', apiKey);
+        apiModal.style.display = 'none';
+        startCamera();
+      }
+    };
+
+    async function startCamera() {
+      try {
+        const stream = await navigator.mediaDevices.getUserMedia({
+          video: { 
+            facingMode: { ideal: 'environment' },
+            width: { ideal: 1280 }
+          },
+          audio: false
+        });
+        video.srcObject = stream;
+        video.setAttribute("playsinline", true);
+        await video.play();
+      } catch (err) {
+        alert("Errore fotocamera: " + err.message);
+      }
+    }
+
+    btnAction.onclick = async () => {
+      if (!apiKey) {
+        apiModal.style.display = 'flex';
+        return;
+      }
+
+      if (!video.videoWidth) {
+        alert("Attendi che il video si sia avviato.");
+        return;
+      }
+
+      btnAction.disabled = true;
+      btnAction.innerText = "ANALISI...";
+      decisionEl.innerText = "ELABORAZIONE...";
+      decisionEl.className = "";
+
+      // Compressione ottimizzata per Chrome Mobile
+      canvas.width = 800;
+      canvas.height = (video.videoHeight / video.videoWidth) * 800;
+      const ctx = canvas.getContext('2d');
+      ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
+      const base64Image = canvas.toDataURL('image/jpeg', 0.65).split(',')[1];
+
+      try {
+        const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${apiKey}`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            contents: [{
+              role: "user",
+              parts: [
+                { text: SYSTEM_PROMPT },
+                { inline_data: { mime_type: "image/jpeg", data: base64Image } }
+              ]
+            }],
+            generationConfig: {
+              response_mime_type: "application/json",
+              temperature: 0.1
+            }
+          })
+        });
+
+        const data = await response.json();
+
+        if (data.error) {
+          throw new Error(data.error.message || "Errore API");
+        }
+
+        const outputText = data.candidates?.[0]?.content?.parts?.[0]?.text;
+        
+        if (outputText) {
+          const parsed = JSON.parse(outputText);
+          decisionEl.innerText = parsed.mossa;
+          detailsEl.innerHTML = `• ${parsed.punto_1}<br>• ${parsed.punto_2}`;
+
+          const action = parsed.mossa.toUpperCase();
+          if (action.includes("C-BET") || action.includes("RAISE")) decisionEl.className = "status-raise";
+          else if (action.includes("CHECK") || action.includes("CALL")) decisionEl.className = "status-call";
+          else decisionEl.className = "status-fold";
+        } else {
+          decisionEl.innerText = "ERRORE";
+          detailsEl.innerText = "Nessuna risposta dal server.";
+        }
+      } catch (err) {
+        decisionEl.innerText = "ERRORE";
+        detailsEl.innerText = err.message;
+      } finally {
+        btnAction.disabled = false;
+        btnAction.innerText = "SCATTA E DECIDI";
+      }
+    };
+  </script>
+</body>
+</html>
