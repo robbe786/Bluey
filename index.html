@@ -6,132 +6,23 @@
   <title>Poker Assistant 360°</title>
   <style>
     * { box-sizing: border-box; margin: 0; padding: 0; font-family: system-ui, -apple-system, sans-serif; }
-    
-    body { 
-      background-color: #121212; 
-      color: #fff; 
-      height: 100vh;
-      height: 100dvh;
-      display: flex; 
-      flex-direction: column; 
-      overflow: hidden; 
-    }
-
-    #camera-container { 
-      flex: 1 1 auto; 
-      min-height: 0;
-      position: relative; 
-      background: #000; 
-      overflow: hidden; 
-      display: flex; 
-      justify-content: center; 
-      align-items: center; 
-    }
-
-    video { 
-      width: 100%; 
-      height: 100%; 
-      object-fit: cover; 
-    }
-
-    #overlay-box { 
-      position: absolute; 
-      border: 2px dashed rgba(255,255,255,0.4); 
-      width: 85%; 
-      height: 65%; 
-      pointer-events: none; 
-      border-radius: 8px; 
-    }
-
-    #result-panel { 
-      flex: 0 0 auto;
-      background: #1a1a1a; 
-      padding: 12px 16px 20px 16px; 
-      display: flex; 
-      flex-direction: column; 
-      align-items: center; 
-      gap: 10px;
-      border-top: 2px solid #333; 
-    }
-
-    #decision { 
-      font-size: 1.8rem; 
-      font-weight: 900; 
-      text-align: center; 
-      letter-spacing: 1px; 
-      color: #888; 
-    }
-
-    #details { 
-      font-size: 0.85rem; 
-      color: #ccc; 
-      width: 100%; 
-      text-align: left; 
-      line-height: 1.35; 
-      min-height: 2.8em;
-    }
-
-    #btn-action { 
-      width: 100%; 
-      padding: 16px; 
-      font-size: 1.2rem; 
-      font-weight: bold; 
-      color: white; 
-      background: #2563eb; 
-      border: none; 
-      border-radius: 12px; 
-      cursor: pointer; 
-      touch-action: manipulation;
-    }
-
+    body { background-color: #121212; color: #fff; height: 100vh; height: 100dvh; display: flex; flex-direction: column; overflow: hidden; }
+    #camera-container { flex: 1 1 auto; min-height: 0; position: relative; background: #000; overflow: hidden; display: flex; justify-content: center; align-items: center; }
+    video { width: 100%; height: 100%; object-fit: cover; }
+    #overlay-box { position: absolute; border: 2px dashed rgba(255,255,255,0.5); width: 85%; height: 65%; pointer-events: none; border-radius: 8px; box-shadow: 0 0 0 9999px rgba(0,0,0,0.45); }
+    #result-panel { flex: 0 0 auto; background: #1a1a1a; padding: 12px 16px 20px 16px; display: flex; flex-direction: column; align-items: center; gap: 10px; border-top: 2px solid #333; }
+    #decision { font-size: 1.8rem; font-weight: 900; text-align: center; letter-spacing: 1px; color: #888; }
+    #details { font-size: 0.85rem; color: #ccc; width: 100%; text-align: left; line-height: 1.35; min-height: 2.8em; }
+    #btn-action { width: 100%; padding: 16px; font-size: 1.2rem; font-weight: bold; color: white; background: #2563eb; border: none; border-radius: 12px; cursor: pointer; touch-action: manipulation; }
     #btn-action:active { background: #1d4ed8; }
     #btn-action:disabled { background: #444; color: #888; cursor: not-allowed; }
-
     .status-raise { color: #3b82f6 !important; }
     .status-call { color: #10b981 !important; }
     .status-fold { color: #ef4444 !important; }
-
-    #api-modal { 
-      position: fixed; 
-      inset: 0; 
-      background: rgba(0,0,0,0.92); 
-      display: flex; 
-      justify-content: center; 
-      align-items: center; 
-      padding: 20px; 
-      z-index: 100; 
-    }
-
-    .modal-content { 
-      background: #222; 
-      padding: 20px; 
-      border-radius: 12px; 
-      width: 100%; 
-      max-width: 350px; 
-      border: 1px solid #333;
-    }
-
-    .modal-content input { 
-      width: 100%; 
-      padding: 12px; 
-      margin: 12px 0; 
-      border-radius: 6px; 
-      border: 1px solid #444; 
-      background: #111; 
-      color: white; 
-      font-size: 0.95rem;
-    }
-
-    .modal-content button { 
-      width: 100%; 
-      padding: 12px; 
-      background: #2563eb; 
-      border: none; 
-      border-radius: 6px; 
-      color: white; 
-      font-weight: bold; 
-      font-size: 1rem;
-    }
+    #api-modal { position: fixed; inset: 0; background: rgba(0,0,0,0.92); display: flex; justify-content: center; align-items: center; padding: 20px; z-index: 100; }
+    .modal-content { background: #222; padding: 20px; border-radius: 12px; width: 100%; max-width: 350px; border: 1px solid #333; }
+    .modal-content input { width: 100%; padding: 12px; margin: 12px 0; border-radius: 6px; border: 1px solid #444; background: #111; color: white; font-size: 0.95rem; }
+    .modal-content button { width: 100%; padding: 12px; background: #2563eb; border: none; border-radius: 6px; color: white; font-weight: bold; font-size: 1rem; }
   </style>
 </head>
 <body>
@@ -151,7 +42,7 @@
 
   <div id="result-panel">
     <div id="decision">IN ATTESA</div>
-    <div id="details">Inquadra il tavolo e premi il pulsante o usa tastiera/mouse.</div>
+    <div id="details">Inquadra il tavolo dentro il riquadro.</div>
     <button id="btn-action">SCATTA E DECIDI</button>
   </div>
 
@@ -159,29 +50,31 @@
 
   <script>
     const SYSTEM_PROMPT = `Sei un coach infallibile di Spin & Go (target: 75-80 ChipEV/t).
-Analizza con estrema precisione ottica:
-1. LE DUE CARTE DI HERO in basso al centro (valore e seme: s=picche, h=cuori, d=quadri, c=fiori). Fai attenzione: il mazzo a 4 colori usa Picche=Nero, Cuori=Rosso, Quadri=Blu, Fiori=Verde.
-2. Carte comuni del board (se presenti).
-3. Stack residuo di Hero in BB, piatto in BB e fase (3-Handed o Heads-Up).
-4. Griglia HUD 2x2 avversari (In alto: Hands, VPIP | In basso: PFR, FCB).
+L'immagine ritagliata contiene solo il tavolo da poker.
+ANALISI VISIVA AD ALTA PRECISIONE:
+1. LE DUE CARTE DI HERO: Si trovano ESCLUSIVAMENTE in basso al centro, sopra al nome utente/stack. NON confonderle MAI con le carte comuni del board al centro del tavolo. Le due carte di Hero NON cambiano tra pre-flop e post-flop.
+2. Identifica con cura valore e seme (Mazzo 4 colori: Picche=Nero, Cuori=Rosso, Quadri=Blu, Fiori=Verde). Attento a non scambiare 10 con Q/K o 8 con 3/B.
+3. BOARD: Carte scoperte al centro (Flop: 3 carte, Turn: 4, River: 5).
+4. POT e STACK di Hero in BB; Giocatori attivi (3-Handed o HU).
+5. HUD Hand2Note (griglia 2x2 vicino agli oppo): Alto=[Hands, VPIP] | Basso=[PFR, FCB].
 
-REGOLE DI GIOCO:
-1. POT ODDS ESTREME: se un oppo va all-in e mancano <= 1.5 BB per chiamare (o equity <= 25%), CALL col 100% delle carte (Any Two Cards).
+REGOLE DI GIOCO COGENTI:
+1. POT ODDS ESTREME: se un oppo va all-in e mancano <= 1.5 BB per chiamare (o equity <= 25%), CALL 100% (Any Two Cards).
 2. EXPLOIT HUD:
-   - Calling Station (VPIP >= 55% e VPIP-PFR >= 25): no bluff, 3 strade di valore pesanti con top pair+.
+   - Calling Station (VPIP >= 55%, VPIP-PFR >= 25): no bluff, 3 strade di valore pesante con top pair+.
    - Nit (VPIP <= 24%, o FCB >= 60% solo se Hands >= 25): c-bet 100% da aggressore e steal allargato.
    - Ignora FCB se Hands < 25.
 3. PRE-FLOP:
-   - Sotto 8 BB: tabelle Push/Fold matematiche.
-   - 8-12 BB in Heads-Up: open-shove diretto con mani speculative/coppie medie; min-raise solo con top range pronto al call. Mai min-raise/fold a <12 BB in HU.
+   - < 8 BB: tabelle Push/Fold matematiche.
+   - 8-12 BB in HU da SB: open-shove con mani marginali/coppie medio-basse; min-raise solo con mani premium pronte al call. Mai min-raise/fold a < 12 BB in HU.
    - > 8 BB in 3-Handed: min-raise standard.
-4. RIVER: FOLD a qualsiasi raise/shove senza nuts assoluto.
+4. RIVER: FOLD a qualsiasi raise/shove se non hai i nuts assoluti.
 
-FORMATO OUTPUT: Rispondi SEMPRE ed ESCLUSIVAMENTE in JSON valido senza backtick o markdown:
+RISPONDI ESCLUSIVAMENTE IN JSON VALIDO (nessun markdown o testo extra):
 {
   "mossa": "AZIONE CON SIZING",
-  "mie_carte": "Valore e seme delle carte in mano (es: 'Ad Kh' o '7s 8s')",
-  "dettaglio_tavolo": "Board + HUD avversari o motivazione sintetica"
+  "mie_carte": "Valore e seme delle 2 carte di Hero (es: 'Ad Kh', 'Ts 8c')",
+  "dettaglio_tavolo": "Board + HUD oppo o motivazione tecnica"
 }`;
 
     const video = document.getElementById('video');
@@ -216,7 +109,7 @@ FORMATO OUTPUT: Rispondi SEMPRE ed ESCLUSIVAMENTE in JSON valido senza backtick 
             facingMode: { ideal: 'environment' },
             width: { ideal: 1920, min: 1280 },
             height: { ideal: 1080, min: 720 },
-            focusMode: { ideal: 'continuous' }
+            advanced: [{ exposureMode: 'continuous' }, { focusMode: 'continuous' }]
           },
           audio: false
         });
@@ -234,24 +127,33 @@ FORMATO OUTPUT: Rispondi SEMPRE ed ESCLUSIVAMENTE in JSON valido senza backtick 
         return;
       }
 
-      if (!video.videoWidth) {
-        alert("Attendi che il video si sia avviato.");
-        return;
-      }
+      if (!video.videoWidth) return;
 
       btnAction.disabled = true;
       btnAction.innerText = "ANALISI...";
       decisionEl.innerText = "ELABORAZIONE...";
       decisionEl.className = "";
 
-      const targetWidth = 1280;
+      // CROP MIRATO: ritaglia solo l'area dell'overlay (85% larghezza, 65% altezza)
+      const vWidth = video.videoWidth;
+      const vHeight = video.videoHeight;
+      const cropW = vWidth * 0.85;
+      const cropH = vHeight * 0.65;
+      const cropX = (vWidth - cropW) / 2;
+      const cropY = (vHeight - cropH) / 2;
+
+      // Risoluzione potenziata a 1600px sul solo tavolo
+      const targetWidth = 1600;
       canvas.width = targetWidth;
-      canvas.height = (video.videoHeight / video.videoWidth) * targetWidth;
+      canvas.height = (cropH / cropW) * targetWidth;
+
       const ctx = canvas.getContext('2d');
       ctx.imageSmoothingEnabled = true;
       ctx.imageSmoothingQuality = 'high';
-      ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
-      const base64Image = canvas.toDataURL('image/jpeg', 0.80).split(',')[1];
+
+      // Disegna solo la porzione del tavolo ritagliata
+      ctx.drawImage(video, cropX, cropY, cropW, cropH, 0, 0, canvas.width, canvas.height);
+      const base64Image = canvas.toDataURL('image/jpeg', 0.90).split(',')[1];
 
       try {
         const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-3-flash-preview:generateContent?key=${apiKey}`, {
@@ -267,40 +169,27 @@ FORMATO OUTPUT: Rispondi SEMPRE ed ESCLUSIVAMENTE in JSON valido senza backtick 
             }],
             generationConfig: {
               response_mime_type: "application/json",
-              temperature: 0.1,
+              temperature: 0.0,
               max_output_tokens: 250,
-              thinking_config: {
-                thinking_budget: 0
-              }
+              thinking_config: { thinking_budget: 0 }
             }
           })
         });
 
         const data = await response.json();
-
-        if (data.error) {
-          throw new Error(data.error.message || "Errore API");
-        }
+        if (data.error) throw new Error(data.error.message || "Errore API");
 
         let outputText = data.candidates?.[0]?.content?.parts?.[0]?.text;
-        
         if (outputText) {
           outputText = outputText.replace(/```json/gi, '').replace(/```/g, '').trim();
-          
           let parsed;
           try {
             parsed = JSON.parse(outputText);
           } catch (e) {
-            parsed = {
-              mossa: "RIPETI SCATTO",
-              mie_carte: "Lettura incerta",
-              dettaglio_tavolo: outputText.slice(0, 70)
-            };
+            parsed = { mossa: "RIPETI SCATTO", mie_carte: "Lettura incerta", dettaglio_tavolo: outputText.slice(0, 70) };
           }
 
           decisionEl.innerText = parsed.mossa || "INFO";
-          
-          // Prima riga: CARTE IN MANO ben visibili | Seconda riga: Dettagli/HUD
           const heroCards = parsed.mie_carte ? `<b style="color: #60a5fa;">CARTE HERO: [ ${parsed.mie_carte} ]</b>` : 'CARTE NON RILEVATE';
           detailsEl.innerHTML = `• ${heroCards}<br>• ${parsed.dettaglio_tavolo || ''}`;
 
@@ -338,9 +227,7 @@ FORMATO OUTPUT: Rispondi SEMPRE ed ESCLUSIVAMENTE in JSON valido senza backtick 
         e.key === 'VolumeDown'
       ) {
         e.preventDefault();
-        if (!btnAction.disabled) {
-          btnAction.click();
-        }
+        if (!btnAction.disabled) btnAction.click();
       }
     });
 
