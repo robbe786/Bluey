@@ -151,7 +151,7 @@
 
   <div id="result-panel">
     <div id="decision">IN ATTESA</div>
-    <div id="details">Inquadra il tavolo e premi il pulsante o usa il telecomando.</div>
+    <div id="details">Inquadra il tavolo e premi il pulsante o usa la tastiera/mouse.</div>
     <button id="btn-action">SCATTA E DECIDI</button>
   </div>
 
@@ -160,27 +160,39 @@
   <script>
     const SYSTEM_PROMPT = `Sei un coach infallibile di Spin & Go 3-max (target: 75-80 ChipEV/t).
 Analizza l'immagine ed estrai: le mie carte in basso, la strada corrente, il board, il piatto e lo stack residuo di Hero in BB.
-Inoltre, individua e leggi i riquadri neri dell'HUD (griglia 2x2 posizionata vicino agli avversari):
+Inoltre, individua e leggi i riquadri neri dell'HUD (griglia 2x2 vicino agli avversari):
 - In alto a sinistra: Hands | In alto a destra: VPIP %
 - In basso a sinistra: PFR % | In basso a destra: FCB % (Fold to Flop C-Bet)
 
-REGOLE DI EXPLOIT COGENTI (se Hands >= 8):
-1. CONTRO CALLING STATION (VPIP >= 38% o FCB <= 35%):
-   - POST-FLOP: Elimina categoricamente bluff e c-bet con aria totale.
-   - VALORE: Punta forte (66%+ pot o All-in) con Top Pair o punto fatto (3 strade piene di valore).
-   - PRE-FLOP: Isola i loro limp con range lineare (coppie, carte alte); non fare steal marginali.
-2. CONTRO NIT (VPIP <= 18% o FCB >= 58%):
-   - POST-FLOP: C-bet sistematica (25-33% pot) con il 100% del range su qualsiasi flop se sei aggressore.
-   - PRE-FLOP: Allarga lo steal aggredendo il suo Big Blind.
-3. SE NON CI SONO STATISTICHE (Hands < 8):
-   - Segui le tabelle Push/Fold standard sotto 8 BB; min-raise (2 BB) sopra 8 BB con mani buone; difendi BB solo con potenziale.
-4. AGGRESSIONI AL RIVER: Fai FOLD sistematico contro rilanci al River se non hai il punto assoluto/nuts.
+REGOLE DI EXPLOIT E GTO COGENTI:
+
+1. ECCEZIONE POT ODDS ESTREME (Regola Prioritaria Assoluta):
+   - Se un avversario va ALL-IN e ad Hero mancano 1.5 BB o meno per completare il piatto (o l'equity matematica richiesta è <= 25%), fai CALL col 100% DELLE CARTE (Any Two Cards). MAI FOLD.
+
+2. EURISTICA AVVERSARI (Campione Hands):
+   - VPIP e PFR sono affidabili se Hands >= 10.
+   - ATTENZIONE SU FCB: Ignora il dato FCB se Hands < 25 (campione insufficiente per post-flop).
+
+3. PROFILAZIONE 3-HANDED CORRETTA:
+   - VERA CALLING STATION: VPIP >= 55% con divario VPIP-PFR >= 25.
+     * POST-FLOP: Elimina i bluff puri; c-betta solo con showdown value; estrai 3 strade di valore pesanti (66%+ pot / shove) con top pair o punto fatto.
+     * PRE-FLOP: Isola i limp con range lineare (coppie, A-x, broadway).
+   - NIT NEL 3-HANDED: VPIP <= 24%, OPPURE (solo se Hands >= 25) FCB >= 60%.
+     * POST-FLOP: Se ha FCB alto accertato, c-betta al 100% (size 25-33% pot).
+     * PRE-FLOP: Allarga lo steal da BTN/SB contro il suo BB.
+   - REGOLARE / FIELD STANDARD (VPIP 30-48%): Gioca GTO solido.
+
+4. SHORT-STACK PRE-FLOP (Senza exploit specifici):
+   - Sotto 8 BB residui: applica tabelle matematiche Push/Fold.
+   - Sopra 8 BB da BTN/SB: min-raise (2 BB) con mani legittime; difendi il BB contro raise se hai carte giocabili.
+
+5. AGGRESSIONI AL RIVER: Fai FOLD sistematico contro rilanci/shove al River se non hai il punto assoluto/nuts.
 
 REGOLA DI RISPOSTA: Rispondi SEMPRE ed ESCLUSIVAMENTE in JSON valido senza backtick o markdown:
 {
   "mossa": "AZIONE CON SIZING" (es: "ALL-IN", "MIN-RAISE 2 BB", "C-BET 1 BB", "CHECK", "CALL", "FOLD", "RIPETI SCATTO"),
   "punto_1": "HUD: [Opp1: H.. V.. P.. F..] | [Opp2: H.. V.. P.. F..]",
-  "punto_2": "Motivazione tecnica dell'exploit o della linea GTO"
+  "punto_2": "Motivazione tecnica (Odds/Exploit/GTO)"
 }`;
 
     const video = document.getElementById('video');
@@ -323,6 +335,7 @@ REGOLA DI RISPOSTA: Rispondi SEMPRE ed ESCLUSIVAMENTE in JSON valido senza backt
       }
     };
 
+    // Supporto tastiera USB, telecomandi e tastierini
     window.addEventListener('keydown', (e) => {
       if (
         e.code === 'Space' || 
@@ -336,6 +349,13 @@ REGOLA DI RISPOSTA: Rispondi SEMPRE ed ESCLUSIVAMENTE in JSON valido senza backt
         if (!btnAction.disabled) {
           btnAction.click();
         }
+      }
+    });
+
+    // Supporto click mouse ovunque sullo schermo (esclusi gli input di testo)
+    window.addEventListener('click', (e) => {
+      if (e.target.tagName !== 'INPUT' && e.target.tagName !== 'BUTTON' && !btnAction.disabled) {
+        btnAction.click();
       }
     });
   </script>
