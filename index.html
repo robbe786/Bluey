@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-  <title>Poker Assistant 1-Tap</title>
+  <title>Poker Assistant 360°</title>
   <style>
     * { box-sizing: border-box; margin: 0; padding: 0; font-family: system-ui, -apple-system, sans-serif; }
     
@@ -151,26 +151,37 @@
 
   <div id="result-panel">
     <div id="decision">IN ATTESA</div>
-    <div id="details">Inquadra il tavolo e premi il pulsante blu.</div>
+    <div id="details">Inquadra il tavolo e premi il pulsante o usa il telecomando.</div>
     <button id="btn-action">SCATTA E DECIDI</button>
   </div>
 
   <canvas id="canvas" style="display: none;"></canvas>
 
   <script>
-    const SYSTEM_PROMPT = `Sei un assistente real-time specializzato esclusivamente nelle decisioni di C-Bet post-flop per Spin & Go (€1, 3-max, stack <20 BB).
-Ad ogni immagine del tavolo che ricevi:
-1. Individua subito: le mie carte in basso, il board comune al flop, il piatto totale e il mio stack residuo in BB.
-2. Se sono l'aggressore pre-flop, valuta la texture del flop (vantaggio di range vs BB, dry/wet) e l'SPR:
-   - C-bet favorevole (es. Asso/Re alto, board disconnesso, out forti): indica puntata con sizing esatto (di norma small/min-bet ~33% pot o 1 BB).
-   - Check-behind (es. board connesso medio-basso, showdown value debole da controllare, zero fold equity).
-3. Se invece affronto una bet o mi trovo al turn/river, fornisci la linea di difesa/adattamento corretta.
+    const SYSTEM_PROMPT = `Sei un coach esperto e infallibile di Spin & Go per micro-limiti (1€-2€, 3-max, stack tipici 5-25 BB).
+Analizza l'immagine del tavolo ed estrai: le mie carte in basso, la strada corrente, il board (se presente), il piatto in BB e lo stack residuo di Hero in BB.
 
-Fornisci SEMPRE la risposta in questo formato JSON esatto senza backtick o markdown:
+Regole decisionali a 360°:
+
+1. FASE PRE-FLOP (Nessuna carta comune sul tavolo):
+   - Se stack residuo <= 8 BB: applica le tabelle matematiche di Push/Fold (All-in diretto con assi, coppie, broadway e broadway suited; Fold con trash hands).
+   - Se stack > 8 BB da BTN/SB: min-raise (2 BB) con range solido; Open-shove con coppie medie se gli stack sono corti; Limp o Fold con mani deboli/speculative.
+   - Da Big Blind: check se c'è limp; se c'è rilancio, difendi con call solo mani con potenziale (suited connectors, broadway) o 3-bet shove con top range.
+
+2. FASE FLOP:
+   - Se Hero è l'aggressore: C-bet standard da 1 BB (o 25-33% pot) su board dry con carte alte (A, K, Q). Fai CHECK-BEHIND su board bassi o molto connessi (es. 8-7-6 bicolore) per controllare il piatto.
+   - Se Hero affronta una bet: Call solo con top pair, draw forti (8+ out) o con odds favorevoli; Fold su second/third pair senza draw.
+
+3. FASE TURN & RIVER:
+   - Adattamento exploit per il field 1€-2€: NON fare mai bluff puri al river (il field chiama troppo).
+   - Fai value bet corpose con punto forte (due coppie, set, top pair top kicker).
+   - Fai CHECK/FOLD se la texture peggiora drasticamente e non hai showdown value.
+
+REGOLA FONDAMENTALE SULL'OUTPUT: Rispondi SEMPRE ed ESCLUSIVAMENTE in JSON valido senza markdown o backtick. Se l'immagine è sgranata o poco chiara compila il campo mossa con "RIPETI SCATTO":
 {
-  "mossa": "C-BET [X] BB" | "CHECK-BEHIND" | "CALL [X] BB" | "FOLD" | "CHECK",
-  "punto_1": "Motivazione tecnica 1 (Range advantage / texture flop)",
-  "punto_2": "Motivazione tecnica 2 (Pot odds / Equity / SPR)"
+  "mossa": "AZIONE CON SIZING" (es: "ALL-IN", "MIN-RAISE 2 BB", "C-BET 1 BB", "CHECK-BEHIND", "CALL", "FOLD", "CHECK", "RIPETI SCATTO"),
+  "punto_1": "Lettura tecnica sintetica (Fase di gioco, texture o odds)",
+  "punto_2": "Motivazione strategica (Valore, pot control o push/fold)"
 }`;
 
     const video = document.getElementById('video');
@@ -233,7 +244,6 @@ Fornisci SEMPRE la risposta in questo formato JSON esatto senza backtick o markd
       decisionEl.innerText = "ELABORAZIONE...";
       decisionEl.className = "";
 
-      // Cattura nitida a 1280px
       const targetWidth = 1280;
       canvas.width = targetWidth;
       canvas.height = (video.videoHeight / video.videoWidth) * targetWidth;
@@ -258,7 +268,7 @@ Fornisci SEMPRE la risposta in questo formato JSON esatto senza backtick o markd
             generationConfig: {
               response_mime_type: "application/json",
               temperature: 0.1,
-              max_output_tokens: 150,
+              max_output_tokens: 250,
               thinking_config: {
                 thinking_budget: 0
               }
@@ -272,20 +282,38 @@ Fornisci SEMPRE la risposta in questo formato JSON esatto senza backtick o markd
           throw new Error(data.error.message || "Errore API");
         }
 
-        const outputText = data.candidates?.[0]?.content?.parts?.[0]?.text;
+        let outputText = data.candidates?.[0]?.content?.parts?.[0]?.text;
         
         if (outputText) {
-          const parsed = JSON.parse(outputText);
-          decisionEl.innerText = parsed.mossa;
-          detailsEl.innerHTML = `• ${parsed.punto_1}<br>• ${parsed.punto_2}`;
+          outputText = outputText.replace(/```json/gi, '').replace(/```/g, '').trim();
+          
+          let parsed;
+          try {
+            parsed = JSON.parse(outputText);
+          } catch (e) {
+            parsed = {
+              mossa: "RIPETI SCATTO",
+              punto_1: "Immagine poco leggibile o riflesso",
+              punto_2: outputText.slice(0, 70)
+            };
+          }
 
-          const action = parsed.mossa.toUpperCase();
-          if (action.includes("C-BET") || action.includes("RAISE")) decisionEl.className = "status-raise";
-          else if (action.includes("CHECK") || action.includes("CALL")) decisionEl.className = "status-call";
-          else decisionEl.className = "status-fold";
+          decisionEl.innerText = parsed.mossa || "INFO";
+          detailsEl.innerHTML = `• ${parsed.punto_1 || 'Elaborato'}<br>• ${parsed.punto_2 || ''}`;
+
+          const action = (parsed.mossa || '').toUpperCase();
+          if (action.includes("ALL-IN") || action.includes("RAISE") || action.includes("C-BET")) {
+            decisionEl.className = "status-raise";
+          } else if (action.includes("CHECK") || action.includes("CALL")) {
+            decisionEl.className = "status-call";
+          } else if (action.includes("FOLD")) {
+            decisionEl.className = "status-fold";
+          } else {
+            decisionEl.className = "";
+          }
         } else {
           decisionEl.innerText = "ERRORE";
-          detailsEl.innerText = "Nessuna risposta dal server.";
+          detailsEl.innerText = "Nessuna risposta dal modello.";
         }
       } catch (err) {
         decisionEl.innerText = "ERRORE";
@@ -295,6 +323,23 @@ Fornisci SEMPRE la risposta in questo formato JSON esatto senza backtick o markd
         btnAction.innerText = "SCATTA E DECIDI";
       }
     };
+
+    // Ascolto eventi tastiera / telecomando di scatto / cavo USB
+    window.addEventListener('keydown', (e) => {
+      if (
+        e.code === 'Space' || 
+        e.code === 'Enter' || 
+        e.key === 'Enter' || 
+        e.key === ' ' || 
+        e.key === 'VolumeUp' || 
+        e.key === 'VolumeDown'
+      ) {
+        e.preventDefault();
+        if (!btnAction.disabled) {
+          btnAction.click();
+        }
+      }
+    });
   </script>
 </body>
 </html>
