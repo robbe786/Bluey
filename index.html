@@ -47,7 +47,7 @@
     <div class="api-box">
       <input type="password" id="api-key" placeholder="Incolla Gemini API Key" />
     </div>
-    <button id="snap-btn">Elabora Spot</button>
+    <button id="snap-btn">Scatta e Decidi</button>
   </div>
 
   <div id="output-panel">
@@ -67,7 +67,7 @@
       </div>
     </div>
 
-    <div class="rationale" id="display-rationale">Inquadra il tavolo e premi 'Elabora Spot'.</div>
+    <div class="rationale" id="display-rationale">Inquadra il tavolo e premi 'Scatta e Decidi'.</div>
     <div class="latency-tag" id="display-latency">Latenza: 0 ms</div>
   </div>
 
@@ -161,7 +161,7 @@ Rispondi ESCLUSIVAMENTE con un file JSON valido conforme allo schema.`;
         video.srcObject = stream;
       } catch (err) {
         console.error("Errore fotocamera:", err);
-        displayRationale.textContent = "Errore apertura webcam: accertati di eseguire su HTTPS o localhost.";
+        displayRationale.textContent = "Errore apertura fotocamera: assicurati di usare HTTPS.";
       }
     }
 
@@ -189,6 +189,7 @@ Rispondi ESCLUSIVAMENTE con un file JSON valido conforme allo schema.`;
       try {
         const base64Image = captureBase64();
         const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${apiKey}`;
+
         const payload = {
           contents: [
             {
