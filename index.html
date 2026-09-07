@@ -10,15 +10,14 @@
     #camera-container { flex: 1 1 auto; min-height: 0; position: relative; background: #000; overflow: hidden; display: flex; justify-content: center; align-items: center; }
     video { width: 100%; height: 100%; object-fit: cover; }
     
-    /* Rettangolo ottimizzato panoramico per il tavolo PokerStars */
     #overlay-box { 
       position: absolute; 
-      border: 2px dashed rgba(255,255,255,0.6); 
+      border: 2px dashed rgba(255,255,255,0.7); 
       width: 96%; 
       height: 48%; 
       pointer-events: none; 
       border-radius: 8px; 
-      box-shadow: 0 0 0 9999px rgba(0,0,0,0.55); 
+      box-shadow: 0 0 0 9999px rgba(0,0,0,0.6); 
     }
     
     #result-panel { flex: 0 0 auto; background: #1a1a1a; padding: 12px 16px 20px 16px; display: flex; flex-direction: column; align-items: center; gap: 10px; border-top: 2px solid #333; }
@@ -27,9 +26,11 @@
     #btn-action { width: 100%; padding: 16px; font-size: 1.2rem; font-weight: bold; color: white; background: #2563eb; border: none; border-radius: 12px; cursor: pointer; touch-action: manipulation; }
     #btn-action:active { background: #1d4ed8; }
     #btn-action:disabled { background: #444; color: #888; cursor: not-allowed; }
+
     .status-raise { color: #3b82f6 !important; }
     .status-call { color: #10b981 !important; }
     .status-fold { color: #ef4444 !important; }
+
     #api-modal { position: fixed; inset: 0; background: rgba(0,0,0,0.92); display: flex; justify-content: center; align-items: center; padding: 20px; z-index: 100; }
     .modal-content { background: #222; padding: 20px; border-radius: 12px; width: 100%; max-width: 350px; border: 1px solid #333; }
     .modal-content input { width: 100%; padding: 12px; margin: 12px 0; border-radius: 6px; border: 1px solid #444; background: #111; color: white; font-size: 0.95rem; }
@@ -61,30 +62,32 @@
 
   <script>
     const SYSTEM_PROMPT = `Sei un coach infallibile di Spin & Go (target: 75-80 ChipEV/t).
-L'immagine ritagliata mostra solo il tavolo panoramico da poker.
-ANALISI VISIVA AD ALTA PRECISIONE:
-1. LE DUE CARTE DI HERO: Si trovano ESCLUSIVAMENTE in basso al centro, sopra al nome utente/stack. NON confonderle MAI con il board al centro. Le carte di Hero NON cambiano tra pre-flop e post-flop.
-2. Identifica valore e seme (Mazzo 4 colori: Picche=Nero, Cuori=Rosso, Quadri=Blu, Fiori=Verde). Non confondere 10 con Q/K, o 8 con 3/B.
-3. BOARD: Carte comuni al centro (Flop: 3 carte, Turn: 4, River: 5).
-4. POT e STACK di Hero in BB; Fase (3-Handed o HU).
-5. HUD Hand2Note (griglia 2x2 vicino a ciascun oppo): Alto=[Hands, VPIP] | Basso=[PFR, FCB].
+ANALISI OTTICA RIGOROSA SU MAZZO STANDARD A 2 COLORI (Rosso e Nero):
+1. CARTE HERO (in basso al centro sopra il nome utente):
+   - SEMI NERI: Picche (♠ - triangolare appuntita con gambo) oppure Fiori (♣ - tre petali arrotondati con gambo).
+   - SEMI ROSSI: Cuori (♥ - due lobi arrotondati in cima) oppure Quadri (♦ - rombo geometrico a 4 lati dritti).
+   - REGOLA ASSOLUTA: Un seme rosso NON può mai essere né Picche né Fiori; un seme nero NON può mai essere né Cuori né Quadri.
+   - VALORI: A, K, Q, J, T (10), 9, 8, 7, 6, 5, 4, 3, 2. Distingui con cura T da Q e 8 da 3.
+2. BOARD: Carte comuni scoperte al centro (Flop: 3 carte, Turn: 4, River: 5).
+3. STACK di Hero in BB, Piatto in BB e Giocatori attivi (3-Handed o HU).
+4. HUD Hand2Note (griglia 2x2 vicino a ciascun oppo): Alto=[Hands, VPIP] | Basso=[PFR, FCB].
 
 REGOLE DI GIOCO COGENTI:
-1. POT ODDS ESTREME: se un oppo shova e mancano <= 1.5 BB per chiamare (o equity <= 25%), CALL col 100% delle carte (Any Two Cards).
+1. POT ODDS ESTREME: se un oppo shova e mancano <= 1.5 BB per chiamare (o equity richiesta <= 25%), CALL 100% (Any Two Cards).
 2. EXPLOIT HUD:
-   - Calling Station (VPIP >= 55%, VPIP-PFR >= 25): no bluff, 3 strade di valore pesante con top pair+.
+   - Calling Station (VPIP >= 55%, diff VPIP-PFR >= 25): no bluff, 3 strade di valore pesanti (66%+ pot/shove) con top pair+.
    - Nit (VPIP <= 24%, o FCB >= 60% solo se Hands >= 25): c-bet 100% da aggressore e steal allargato.
    - Ignora FCB se Hands < 25.
 3. PRE-FLOP:
    - < 8 BB: tabelle Push/Fold matematiche.
    - 8-12 BB in HU da SB: open-shove con mani marginali/coppie medio-basse; min-raise solo con mani premium pronte al call. Mai min-raise/fold a < 12 BB in HU.
-   - > 8 BB in 3-Handed: min-raise standard.
-4. RIVER: FOLD a qualsiasi raise/shove se non hai i nuts assoluti.
+   - > 8 BB in 3-Handed: min-raise standard 2 BB.
+4. RIVER: FOLD sistematico contro rilanci pesanti/shove se non hai i nuts assoluti.
 
 RISPONDI ESCLUSIVAMENTE IN JSON VALIDO (senza backtick o markdown):
 {
   "mossa": "AZIONE CON SIZING",
-  "mie_carte": "Valore e seme delle 2 carte di Hero (es: 'Ad Kh', 'Ts 8c')",
+  "mie_carte": "Valore e seme delle 2 carte di Hero (es: 'As Kd', 'Th 7c')",
   "dettaglio_tavolo": "Board + HUD oppo o motivazione tecnica"
 }`;
 
@@ -145,7 +148,7 @@ RISPONDI ESCLUSIVAMENTE IN JSON VALIDO (senza backtick o markdown):
       decisionEl.innerText = "ELABORAZIONE...";
       decisionEl.className = "";
 
-      // RITAGLIO PANORAMICO: 96% larghezza e 48% altezza (proporzioni finestra tavolo)
+      // Ritaglio panoramico: 96% larghezza x 48% altezza
       const vWidth = video.videoWidth;
       const vHeight = video.videoHeight;
       const cropW = vWidth * 0.96;
@@ -161,7 +164,7 @@ RISPONDI ESCLUSIVAMENTE IN JSON VALIDO (senza backtick o markdown):
       ctx.imageSmoothingEnabled = true;
       ctx.imageSmoothingQuality = 'high';
 
-      // Estrae solo l'area schiacciata e allargata del tavolo
+      // Disegna l'area ritagliata a piena risoluzione
       ctx.drawImage(video, cropX, cropY, cropW, cropH, 0, 0, canvas.width, canvas.height);
       const base64Image = canvas.toDataURL('image/jpeg', 0.90).split(',')[1];
 
