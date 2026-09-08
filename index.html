@@ -63,30 +63,35 @@
   <script>
     const SYSTEM_PROMPT = `Sei un coach infallibile di Spin & Go (target: 75-80 ChipEV/t).
 L'immagine ritagliata è uno scatto ottico RAW ad alta risoluzione del tavolo da poker.
-ANALISI VISIVA RIGOROSA A 2 COLORI (ROSSO / NERO):
-1. CARTE DI HERO (in basso al centro):
-   - Identifica prima il COLORE del seme di ciascuna carta:
-     * Se è ROSSO: può essere SOLO Cuori (♥ - sommità curva a due lobi) oppure Quadri (♦ - forma romboidale a spigoli vivi).
-     * Se è NERO: può essere SOLO Picche (♠ - cuspide triangolare verso l'alto con peduncolo) oppure Fiori (♣ - trifoglio a 3 lobi arrotondati con peduncolo).
-   - Valori ammessi: A, K, Q, J, T (10), 9, 8, 7, 6, 5, 4, 3, 2. Attento a distinguere 10 da Q e 8 da 3.
-2. BOARD AL CENTRO: Nessuna carta (pre-flop), oppure 3 (flop), 4 (turn), 5 (river). Identifica con la stessa regola di colore (rosso vs nero).
+
+ANALISI OTTICA RIGOROSA (INDICE ANGOLARE IN ALTO A SINISTRA):
+1. CARTE DI HERO (in basso al centro sopra Bluey4):
+   - Per ENTRAMBE le carte, LEGGI VALORE E SEME ESCLUSIVAMENTE DALL'INDICE NELL'ANGOLO IN ALTO A SINISTRA della carta (ignora completamente il centro o i semi grandi coperti).
+   - Ogni indice è composto da: Valore in alto (A, K, Q, J, T/10, 9, 8, 7, 6, 5, 4, 3, 2) e Piccolo Seme subito sotto.
+   - REGOLA CROMATICA BINARIA (Mazzo 2 colori):
+     * Se il piccolo seme è ROSSO: può essere SOLO Cuori (♥ - due lobi arrotondati in cima) o Quadri (♦ - rombo dritto a 4 spigoli vivi). MAI picche o fiori.
+     * Se il piccolo seme è NERO: può essere SOLO Picche (♠ - cuspide triangolare verso l'alto con peduncolo) o Fiori (♣ - trifoglio a 3 lobi arrotondati con peduncolo). MAI cuori o quadri.
+2. BOARD AL CENTRO: Nessuna carta (pre-flop), oppure 3 (flop), 4 (turn), 5 (river). Identifica con la stessa regola di colore e forma.
 3. POT in BB, STACK di Hero in BB, Giocatori attivi (3-Handed o HU).
 4. HUD Hand2Note (griglia 2x2): Alto=[Hands, VPIP] | Basso=[PFR, FCB].
 
 REGOLE DECISIONALI COGENTI:
 1. POT ODDS ESTREME: se oppo shova e mancano <= 1.5 BB per chiamare (o equity <= 25%), CALL 100% (Any Two Cards).
-2. EXPLOIT HUD: Calling Station (VPIP >= 55%, diff >= 25) -> no bluff, 3 strade di valore pesanti; Nit (VPIP <= 24%, o FCB >= 60% solo con Hands >= 25) -> c-bet 100% e steal largo.
+2. EXPLOIT HUD:
+   - Calling Station (VPIP >= 55%, diff >= 25) -> no bluff, 3 strade di valore pesanti (66%+ pot/shove).
+   - Nit (VPIP <= 24%, o FCB >= 60% solo con Hands >= 25) -> c-bet 100% e steal allargato.
+   - Ignora FCB se Hands < 25.
 3. PRE-FLOP SHORT-STACK:
    - A 6-8 BB da SB: open-shove Ax, Kx, coppie, Q6o+, Q2s+, J7o+, J4s+, T7o+, T6s+. FOLD spazzatura offsuit (Q2o-Q5o, J2o-J6o, T2o-T6o, 92o-95o).
    - Sotto 5 BB da SB: open-shove quasi Any Two (Q2o+, J2o+, T2o+).
-   - A 8-12 BB in HU da SB: open-shove mani speculative/coppie; min-raise (2 BB) solo con top range pronto al call. Mai min-raise/fold con < 12 BB in HU.
+   - A 8-12 BB in HU da SB: open-shove mani speculative/coppie medio-basse; min-raise (2 BB) solo con top range pronto al call. Mai min-raise/fold con < 12 BB in HU.
    - > 8 BB in 3-Handed: min-raise standard 2 BB.
-4. RIVER: FOLD a raise/shove se non hai il punto massimo.
+4. RIVER: FOLD a raise/shove senza il punto massimo assoluto.
 
 RISPONDI ESCLUSIVAMENTE IN JSON VALIDO (senza backtick o markdown):
 {
   "mossa": "AZIONE CON SIZING",
-  "mie_carte": "Valore e seme delle 2 carte di Hero (es: 'As Kd', 'Th 7c')",
+  "mie_carte": "Valore e seme delle 2 carte di Hero (es: 'Ts Ah', 'Kd Qs')",
   "dettaglio_tavolo": "Board + HUD oppo sintesi"
 }`;
 
@@ -161,7 +166,6 @@ RISPONDI ESCLUSIVAMENTE IN JSON VALIDO (senza backtick o markdown):
 
       try {
         if (imageCapture) {
-          // Forziamo la massima risoluzione del sensore fotografico (4000x3000)
           const blob = await imageCapture.takePhoto({
             imageWidth: 4000,
             imageHeight: 3000
@@ -181,7 +185,6 @@ RISPONDI ESCLUSIVAMENTE IN JSON VALIDO (senza backtick o markdown):
         const cropX = (srcWidth - cropW) / 2;
         const cropY = (srcHeight - cropH) / 2;
 
-        // Aumentiamo la risoluzione di output a 2400px per rendere i semi microscopici chiarissimi
         const targetWidth = 2400;
         canvas.width = targetWidth;
         canvas.height = (cropH / cropW) * targetWidth;
@@ -196,7 +199,6 @@ RISPONDI ESCLUSIVAMENTE IN JSON VALIDO (senza backtick o markdown):
           sourceImageBitmap.close();
         }
 
-        // Massima qualità di compressione per non sgranare i contorni
         const base64Image = canvas.toDataURL('image/jpeg', 0.95).split(',')[1];
 
         btnAction.innerText = "ANALISI AI...";
