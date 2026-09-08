@@ -27,7 +27,6 @@
     #btn-action:active { background: #1d4ed8; }
     #btn-action:disabled { background: #444; color: #888; cursor: not-allowed; }
 
-    /* Badge Carte Cromatiche */
     .poker-card {
       display: inline-block;
       font-weight: 800;
@@ -38,10 +37,10 @@
       border: 1px solid #404040;
       letter-spacing: 0.5px;
     }
-    .card-d { color: #38bdf8 !important; } /* Quadri - Blu */
-    .card-c { color: #22c55e !important; } /* Fiori - Verde */
-    .card-h { color: #ef4444 !important; } /* Cuori - Rosso */
-    .card-s { color: #f8fafc !important; } /* Picche - Nero/Bianco */
+    .card-d { color: #38bdf8 !important; }
+    .card-c { color: #22c55e !important; }
+    .card-h { color: #ef4444 !important; }
+    .card-s { color: #f8fafc !important; }
 
     .status-raise { color: #3b82f6 !important; }
     .status-call { color: #10b981 !important; }
@@ -80,35 +79,41 @@
     const SYSTEM_PROMPT = `Sei un coach infallibile di Spin & Go (target: 75-80 ChipEV/t).
 L'immagine ritagliata è uno scatto RAW ad alta risoluzione del tavolo da poker su feltro scuro.
 
-ANALISI CROMATICA RIGOROSA SUL MAZZO A 4 COLORI:
+ANALISI OTTICA DELLA SITUAZIONE DI GIOCO:
 1. CARTE DI HERO (in basso al centro sopra Bluey4):
    - Per ENTRAMBE le carte, LEGGI VALORE E SEME ESCLUSIVAMENTE DALL'INDICE NELL'ANGOLO IN ALTO A SINISTRA.
-   - REGOLA ASSOLUTA DEI 4 COLORI:
-     * BLU acceso / Celeste = QUADRI (♦ / d)
-     * VERDE acceso = FIORI (♣ / c)
-     * ROSSO acceso = CUORI (♥ / h)
-     * NERO puro = PICCHE (♠ / s)
-   - Valori ammessi: A, K, Q, J, T (10), 9, 8, 7, 6, 5, 4, 3, 2. Attento a non confondere T con Q o 8 con 3.
-2. BOARD AL CENTRO: Stessa decodifica a 4 colori (es: 'Ad 7c 2s' o stringa vuota "" se pre-flop).
-3. POT in BB, STACK di Hero in BB, Giocatori attivi (3-Handed o HU).
-4. HUD Hand2Note (griglia 2x2): Alto=[Hands, VPIP] | Basso=[PFR, FCB].
+   - REGOLA 4 COLORI: BLU=Quadri (♦/d), VERDE=Fiori (♣/c), ROSSO=Cuori (♥/h), NERO=Picche (♠/s).
+2. BOARD AL CENTRO: Stessa regola a 4 colori (stringa vuota "" se pre-flop).
+3. RILEVAMENTO PUNTATE AVVERSARI (CRUCIALE):
+   - Sul bordo del tavolo, SUBITO A FIANCO DI CIASCUN BADGE GIOCATORE, sono presenti le fiches con la scritta esatta dell'importo (es: '1 BB', '2 BB', '2.5 BB', o stack intero all-in).
+   - Verifica anche la puntata di Hero posta sopra le sue carte (es: '1 BB').
+   - CALCOLO DIFFERENZA DI PUNTATA:
+     * Se la puntata massima avversaria è UGUALE a quella di Hero (es. tutti hanno messo 1 BB): NESSUN RILANCIO ATTIVO (Hero può fare Check gratuito).
+     * Se un avversario ha una puntata MAGGIORE di quella di Hero (es. oppo ha 2 BB o 2.5 BB e Hero ha 1 BB): C'È UN RILANCIO ATTIVO da fronteggiare.
+4. POT TOTALE, STACK in BB e HUD Hand2Note (Alto=[Hands, VPIP] | Basso=[PFR, FCB]).
 
 REGOLE DECISIONALI COGENTI:
-1. POT ODDS ESTREME: all-in avversario e call <= 1.5 BB (o equity <= 25%) -> CALL 100% (Any Two Cards).
-2. EXPLOIT HUD: Calling Station (VPIP >= 55%, diff >= 25) -> no bluff, 3 strade di valore pesanti. Nit (VPIP <= 24%, o FCB >= 60% solo con Hands >= 25) -> c-bet 100% e steal allargato.
+1. GESTIONE DELL'AZIONE:
+   - Se la puntata avversaria è pari a quella di Hero (nessun rilancio): MAI consigliare "Fold". Consiglia "CHECK" (o "RAISE" per valore/steal).
+   - Se un oppo ha puntato/rilanciato più di Hero: con mani deboli fuori equity consiglia "FOLD". Con mani giocabili valuta Call o 3-Bet Shove.
+   - Se mancano <= 1.5 BB per chiamare su uno shove (o equity <= 25%): "CALL 100% (Any Two Cards)".
+2. EXPLOIT HUD:
+   - Calling Station (VPIP >= 55%, diff >= 25) -> no bluff, 3 strade di valore pesanti.
+   - Nit (VPIP <= 24%, o FCB >= 60% solo se Hands >= 25) -> c-bet 100% e steal allargato.
+   - Ignora FCB se Hands < 25.
 3. PRE-FLOP SHORT-STACK:
-   - A 6-8 BB da SB: open-shove Ax, Kx, coppie, Q6o+, Q2s+, J7o+, J4s+, T7o+, T6s+. FOLD spazzatura offsuit (Q2o-Q5o, J2o-J6o, T2o-T6o, 92o-95o).
-   - Sotto 5 BB da SB: open-shove quasi Any Two (Q2o+, J2o+, T2o+).
-   - A 8-12 BB in HU da SB: open-shove mani speculative/coppie medio-basse; min-raise (2 BB) solo con top range pronto al call. Mai min-raise/fold con < 12 BB in HU.
-   - > 8 BB in 3-Handed: min-raise standard 2 BB.
-4. RIVER: FOLD a raise/shove senza il punto massimo assoluto.
+   - A 6-8 BB da SB: open-shove Ax, Kx, coppie, Q6o+, Q2s+, J7o+, J4s+, T7o+, T6s+. FOLD spazzatura offsuit.
+   - Sotto 5 BB da SB: open-shove quasi Any Two.
+   - A 8-12 BB in HU: open-shove mani speculative/coppie medio-basse; min-raise (2 BB) solo con top range pronto al call.
+   - > 8 BB in 3-Handed: min-raise standard 2 BB (o Check da BB se limpato).
+4. RIVER: FOLD a raise/shove senza nuts assoluti.
 
-RISPONDI ESCLUSIVAMENTE IN FORMATO JSON (senza markdown o backtick):
+RISPONDI ESCLUSIVAMENTE IN JSON VALIDO (senza backtick o markdown):
 {
   "mossa": "AZIONE CON SIZING",
-  "mie_carte": "Valore e seme delle 2 carte di Hero (es: 'Ad Kh')",
-  "board": "Carte scoperte sul tavolo (es: 'Ts 4c 2d', oppure vuoto '')",
-  "dettaglio_tavolo": "HUD oppo o motivazione tecnica sintetica"
+  "mie_carte": "Valore e seme Hero (es: 'Jc Qs')",
+  "board": "Carte board o stringa vuota",
+  "dettaglio_tavolo": "Puntate rilevate (es: 'Hero 1 BB vs Oppo 2.5 BB') + HUD sintesi"
 }`;
 
     const video = document.getElementById('video');
@@ -137,10 +142,8 @@ RISPONDI ESCLUSIVAMENTE IN FORMATO JSON (senza markdown o backtick):
       }
     };
 
-    // Funzione per formattare le carte con i colori nativi del mazzo a 4 colori
     function formatPokerCards(cardString) {
       if (!cardString || typeof cardString !== 'string') return '';
-      // Riconosce carte nel formato As, Kh, 10d, 2c, Ad...
       return cardString.replace(/\b([AKQJT0-9]{1,2})([shdc])\b/gi, (match, val, suit) => {
         const s = suit.toLowerCase();
         let suitSymbol = s;
@@ -210,7 +213,6 @@ RISPONDI ESCLUSIVAMENTE IN FORMATO JSON (senza markdown o backtick):
         const srcWidth = sourceImageBitmap.width || video.videoWidth;
         const srcHeight = sourceImageBitmap.height || video.videoHeight;
 
-        // Ritaglio panoramico 96% x 48% centrato
         const cropW = srcWidth * 0.96;
         const cropH = srcHeight * 0.48;
         const cropX = (srcWidth - cropW) / 2;
@@ -269,7 +271,6 @@ RISPONDI ESCLUSIVAMENTE IN FORMATO JSON (senza markdown o backtick):
 
           decisionEl.innerText = parsed.mossa || "INFO";
 
-          // Formattazione a colori delle carte di Hero e del Board
           const coloredHero = parsed.mie_carte ? formatPokerCards(parsed.mie_carte) : 'NON RILEVATE';
           const coloredBoard = parsed.board ? formatPokerCards(parsed.board) : '<span style="color:#666;">Nessuno (Pre-Flop)</span>';
 
