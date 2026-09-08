@@ -22,10 +22,26 @@
     
     #result-panel { flex: 0 0 auto; background: #1a1a1a; padding: 12px 16px 20px 16px; display: flex; flex-direction: column; align-items: center; gap: 10px; border-top: 2px solid #333; }
     #decision { font-size: 1.8rem; font-weight: 900; text-align: center; letter-spacing: 1px; color: #888; }
-    #details { font-size: 0.85rem; color: #ccc; width: 100%; text-align: left; line-height: 1.35; min-height: 2.8em; }
+    #details { font-size: 0.9rem; color: #ccc; width: 100%; text-align: left; line-height: 1.45; min-height: 2.8em; }
     #btn-action { width: 100%; padding: 16px; font-size: 1.2rem; font-weight: bold; color: white; background: #2563eb; border: none; border-radius: 12px; cursor: pointer; touch-action: manipulation; }
     #btn-action:active { background: #1d4ed8; }
     #btn-action:disabled { background: #444; color: #888; cursor: not-allowed; }
+
+    /* Badge Carte Cromatiche */
+    .poker-card {
+      display: inline-block;
+      font-weight: 800;
+      padding: 1px 6px;
+      margin: 0 2px;
+      border-radius: 4px;
+      background: #262626;
+      border: 1px solid #404040;
+      letter-spacing: 0.5px;
+    }
+    .card-d { color: #38bdf8 !important; } /* Quadri - Blu */
+    .card-c { color: #22c55e !important; } /* Fiori - Verde */
+    .card-h { color: #ef4444 !important; } /* Cuori - Rosso */
+    .card-s { color: #f8fafc !important; } /* Picche - Nero/Bianco */
 
     .status-raise { color: #3b82f6 !important; }
     .status-call { color: #10b981 !important; }
@@ -62,25 +78,24 @@
 
   <script>
     const SYSTEM_PROMPT = `Sei un coach infallibile di Spin & Go (target: 75-80 ChipEV/t).
-L'immagine ritagliata è uno scatto ottico RAW ad alta risoluzione del tavolo da poker.
+L'immagine ritagliata è uno scatto RAW ad alta risoluzione del tavolo da poker su feltro scuro.
 
-ANALISI OTTICA RIGOROSA (INDICE ANGOLARE IN ALTO A SINISTRA):
+ANALISI CROMATICA RIGOROSA SUL MAZZO A 4 COLORI:
 1. CARTE DI HERO (in basso al centro sopra Bluey4):
-   - Per ENTRAMBE le carte, LEGGI VALORE E SEME ESCLUSIVAMENTE DALL'INDICE NELL'ANGOLO IN ALTO A SINISTRA della carta (ignora completamente il centro o i semi grandi coperti).
-   - Ogni indice è composto da: Valore in alto (A, K, Q, J, T/10, 9, 8, 7, 6, 5, 4, 3, 2) e Piccolo Seme subito sotto.
-   - REGOLA CROMATICA BINARIA (Mazzo 2 colori):
-     * Se il piccolo seme è ROSSO: può essere SOLO Cuori (♥ - due lobi arrotondati in cima) o Quadri (♦ - rombo dritto a 4 spigoli vivi). MAI picche o fiori.
-     * Se il piccolo seme è NERO: può essere SOLO Picche (♠ - cuspide triangolare verso l'alto con peduncolo) o Fiori (♣ - trifoglio a 3 lobi arrotondati con peduncolo). MAI cuori o quadri.
-2. BOARD AL CENTRO: Nessuna carta (pre-flop), oppure 3 (flop), 4 (turn), 5 (river). Identifica con la stessa regola di colore e forma.
+   - Per ENTRAMBE le carte, LEGGI VALORE E SEME ESCLUSIVAMENTE DALL'INDICE NELL'ANGOLO IN ALTO A SINISTRA.
+   - REGOLA ASSOLUTA DEI 4 COLORI:
+     * BLU acceso / Celeste = QUADRI (♦ / d)
+     * VERDE acceso = FIORI (♣ / c)
+     * ROSSO acceso = CUORI (♥ / h)
+     * NERO puro = PICCHE (♠ / s)
+   - Valori ammessi: A, K, Q, J, T (10), 9, 8, 7, 6, 5, 4, 3, 2. Attento a non confondere T con Q o 8 con 3.
+2. BOARD AL CENTRO: Stessa decodifica a 4 colori (es: 'Ad 7c 2s' o stringa vuota "" se pre-flop).
 3. POT in BB, STACK di Hero in BB, Giocatori attivi (3-Handed o HU).
 4. HUD Hand2Note (griglia 2x2): Alto=[Hands, VPIP] | Basso=[PFR, FCB].
 
 REGOLE DECISIONALI COGENTI:
-1. POT ODDS ESTREME: se oppo shova e mancano <= 1.5 BB per chiamare (o equity <= 25%), CALL 100% (Any Two Cards).
-2. EXPLOIT HUD:
-   - Calling Station (VPIP >= 55%, diff >= 25) -> no bluff, 3 strade di valore pesanti (66%+ pot/shove).
-   - Nit (VPIP <= 24%, o FCB >= 60% solo con Hands >= 25) -> c-bet 100% e steal allargato.
-   - Ignora FCB se Hands < 25.
+1. POT ODDS ESTREME: all-in avversario e call <= 1.5 BB (o equity <= 25%) -> CALL 100% (Any Two Cards).
+2. EXPLOIT HUD: Calling Station (VPIP >= 55%, diff >= 25) -> no bluff, 3 strade di valore pesanti. Nit (VPIP <= 24%, o FCB >= 60% solo con Hands >= 25) -> c-bet 100% e steal allargato.
 3. PRE-FLOP SHORT-STACK:
    - A 6-8 BB da SB: open-shove Ax, Kx, coppie, Q6o+, Q2s+, J7o+, J4s+, T7o+, T6s+. FOLD spazzatura offsuit (Q2o-Q5o, J2o-J6o, T2o-T6o, 92o-95o).
    - Sotto 5 BB da SB: open-shove quasi Any Two (Q2o+, J2o+, T2o+).
@@ -88,11 +103,12 @@ REGOLE DECISIONALI COGENTI:
    - > 8 BB in 3-Handed: min-raise standard 2 BB.
 4. RIVER: FOLD a raise/shove senza il punto massimo assoluto.
 
-RISPONDI ESCLUSIVAMENTE IN JSON VALIDO (senza backtick o markdown):
+RISPONDI ESCLUSIVAMENTE IN FORMATO JSON (senza markdown o backtick):
 {
   "mossa": "AZIONE CON SIZING",
-  "mie_carte": "Valore e seme delle 2 carte di Hero (es: 'Ts Ah', 'Kd Qs')",
-  "dettaglio_tavolo": "Board + HUD oppo sintesi"
+  "mie_carte": "Valore e seme delle 2 carte di Hero (es: 'Ad Kh')",
+  "board": "Carte scoperte sul tavolo (es: 'Ts 4c 2d', oppure vuoto '')",
+  "dettaglio_tavolo": "HUD oppo o motivazione tecnica sintetica"
 }`;
 
     const video = document.getElementById('video');
@@ -120,6 +136,21 @@ RISPONDI ESCLUSIVAMENTE IN JSON VALIDO (senza backtick o markdown):
         startCamera();
       }
     };
+
+    // Funzione per formattare le carte con i colori nativi del mazzo a 4 colori
+    function formatPokerCards(cardString) {
+      if (!cardString || typeof cardString !== 'string') return '';
+      // Riconosce carte nel formato As, Kh, 10d, 2c, Ad...
+      return cardString.replace(/\b([AKQJT0-9]{1,2})([shdc])\b/gi, (match, val, suit) => {
+        const s = suit.toLowerCase();
+        let suitSymbol = s;
+        if (s === 'd') suitSymbol = '♦';
+        else if (s === 'c') suitSymbol = '♣';
+        else if (s === 'h') suitSymbol = '♥';
+        else if (s === 's') suitSymbol = '♠';
+        return `<span class="poker-card card-${s}">${val.toUpperCase()}${suitSymbol}</span>`;
+      });
+    }
 
     async function startCamera() {
       try {
@@ -233,12 +264,20 @@ RISPONDI ESCLUSIVAMENTE IN JSON VALIDO (senza backtick o markdown):
           try {
             parsed = JSON.parse(outputText);
           } catch (e) {
-            parsed = { mossa: "RIPETI SCATTO", mie_carte: "Lettura incerta", dettaglio_tavolo: outputText.slice(0, 70) };
+            parsed = { mossa: "RIPETI SCATTO", mie_carte: "Lettura incerta", board: "", dettaglio_tavolo: outputText.slice(0, 70) };
           }
 
           decisionEl.innerText = parsed.mossa || "INFO";
-          const heroCards = parsed.mie_carte ? `<b style="color: #60a5fa;">CARTE HERO: [ ${parsed.mie_carte} ]</b>` : 'CARTE NON RILEVATE';
-          detailsEl.innerHTML = `• ${heroCards}<br>• ${parsed.dettaglio_tavolo || ''}`;
+
+          // Formattazione a colori delle carte di Hero e del Board
+          const coloredHero = parsed.mie_carte ? formatPokerCards(parsed.mie_carte) : 'NON RILEVATE';
+          const coloredBoard = parsed.board ? formatPokerCards(parsed.board) : '<span style="color:#666;">Nessuno (Pre-Flop)</span>';
+
+          detailsEl.innerHTML = `
+            • <b>HERO:</b> [ ${coloredHero} ]<br>
+            • <b>BOARD:</b> [ ${coloredBoard} ]<br>
+            • ${parsed.dettaglio_tavolo || ''}
+          `;
 
           const action = (parsed.mossa || '').toUpperCase();
           if (action.includes("ALL-IN") || action.includes("RAISE") || action.includes("C-BET")) {
