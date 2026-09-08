@@ -62,34 +62,32 @@
 
   <script>
     const SYSTEM_PROMPT = `Sei un coach infallibile di Spin & Go (target: 75-80 ChipEV/t).
-ANALISI OTTICA RIGOROSA SU MAZZO STANDARD A 2 COLORI (Rosso e Nero):
-1. CARTE HERO (in basso al centro sopra il nome utente):
-   - SEMI NERI: Picche (♠ - punta triangolare verso l'alto con gambo) o Fiori (♣ - tre petali arrotondati con gambo).
-   - SEMI ROSSI: Cuori (♥ - due lobi arrotondati in alto) o Quadri (♦ - rombo geometrico con 4 lati dritti).
-   - REGOLA BINARIA: Un seme rosso non è MAI picche/fiori; un seme nero non è MAI cuori/quadri.
-   - Valori: A, K, Q, J, T (10), 9, 8, 7, 6, 5, 4, 3, 2. Attento alla distinzione T da Q e 8 da 3.
-2. BOARD: Carte comuni scoperte al centro (Flop: 3 carte, Turn: 4, River: 5).
-3. STACK di Hero in BB, Piatto in BB e Giocatori attivi (3-Handed o Heads-Up).
+L'immagine ritagliata è uno scatto ottico RAW ad alta risoluzione del tavolo da poker.
+ANALISI VISIVA RIGOROSA A 2 COLORI (ROSSO / NERO):
+1. CARTE DI HERO (in basso al centro):
+   - Identifica prima il COLORE del seme di ciascuna carta:
+     * Se è ROSSO: può essere SOLO Cuori (♥ - sommità curva a due lobi) oppure Quadri (♦ - forma romboidale a spigoli vivi).
+     * Se è NERO: può essere SOLO Picche (♠ - cuspide triangolare verso l'alto con peduncolo) oppure Fiori (♣ - trifoglio a 3 lobi arrotondati con peduncolo).
+   - Valori ammessi: A, K, Q, J, T (10), 9, 8, 7, 6, 5, 4, 3, 2. Attento a distinguere 10 da Q e 8 da 3.
+2. BOARD AL CENTRO: Nessuna carta (pre-flop), oppure 3 (flop), 4 (turn), 5 (river). Identifica con la stessa regola di colore (rosso vs nero).
+3. POT in BB, STACK di Hero in BB, Giocatori attivi (3-Handed o HU).
 4. HUD Hand2Note (griglia 2x2): Alto=[Hands, VPIP] | Basso=[PFR, FCB].
 
-REGOLE COGENTI:
-1. POT ODDS ESTREME: all-in avversario e call <= 1.5 BB residui (o equity richiesta <= 25%) -> CALL 100% (Any Two Cards).
-2. EXPLOIT HUD:
-   - Calling Station (VPIP >= 55%, VPIP-PFR >= 25): no bluff, 3 strade di valore pesanti (66%+ pot/shove) con top pair+.
-   - Nit (VPIP <= 24%, o FCB >= 60% solo se Hands >= 25): c-bet 100% da aggressore e steal largo.
-   - Ignora FCB se Hands < 25.
+REGOLE DECISIONALI COGENTI:
+1. POT ODDS ESTREME: se oppo shova e mancano <= 1.5 BB per chiamare (o equity <= 25%), CALL 100% (Any Two Cards).
+2. EXPLOIT HUD: Calling Station (VPIP >= 55%, diff >= 25) -> no bluff, 3 strade di valore pesanti; Nit (VPIP <= 24%, o FCB >= 60% solo con Hands >= 25) -> c-bet 100% e steal largo.
 3. PRE-FLOP SHORT-STACK:
-   - A 6-8 BB da SB: open-shove qualsiasi Ax, Kx, coppie, Q6o+, Q2s+, J7o+, J4s+, T7o+, T6s+. FOLD spazzatura offsuit bassa (Q2o-Q5o, J2o-J6o, T2o-T6o, 92o-95o).
-   - Sotto i 5 BB da SB: open-shove quasi Any Two (inclusi Q2o+, J2o+, T2o+).
-   - A 8-12 BB in Heads-Up da SB: open-shove diretto con mani marginali/coppie medio-basse; min-raise (2 BB) solo con top range pronto a chiamare uno shove. MAI fare min-raise/fold con < 12 BB in HU.
-   - Sopra 8 BB in 3-Handed da BTN/SB: min-raise standard 2 BB con mani solide; difendi il BB contro raise se hai carte giocabili.
-4. RIVER: FOLD sistematico contro rilanci/shove pesanti se non hai i nuts assoluti.
+   - A 6-8 BB da SB: open-shove Ax, Kx, coppie, Q6o+, Q2s+, J7o+, J4s+, T7o+, T6s+. FOLD spazzatura offsuit (Q2o-Q5o, J2o-J6o, T2o-T6o, 92o-95o).
+   - Sotto 5 BB da SB: open-shove quasi Any Two (Q2o+, J2o+, T2o+).
+   - A 8-12 BB in HU da SB: open-shove mani speculative/coppie; min-raise (2 BB) solo con top range pronto al call. Mai min-raise/fold con < 12 BB in HU.
+   - > 8 BB in 3-Handed: min-raise standard 2 BB.
+4. RIVER: FOLD a raise/shove se non hai il punto massimo.
 
 RISPONDI ESCLUSIVAMENTE IN JSON VALIDO (senza backtick o markdown):
 {
   "mossa": "AZIONE CON SIZING",
   "mie_carte": "Valore e seme delle 2 carte di Hero (es: 'As Kd', 'Th 7c')",
-  "dettaglio_tavolo": "Board + HUD oppo o motivazione tecnica"
+  "dettaglio_tavolo": "Board + HUD oppo sintesi"
 }`;
 
     const video = document.getElementById('video');
@@ -122,7 +120,7 @@ RISPONDI ESCLUSIVAMENTE IN JSON VALIDO (senza backtick o markdown):
       try {
         const stream = await navigator.mediaDevices.getUserMedia({
           video: { 
-            facingMode: { exact: 'environment' },
+            facingMode: { ideal: 'environment' },
             width: { ideal: 1920, min: 1280 },
             height: { ideal: 1080, min: 720 },
             advanced: [
@@ -131,19 +129,12 @@ RISPONDI ESCLUSIVAMENTE IN JSON VALIDO (senza backtick o markdown):
             ]
           },
           audio: false
-        }).catch(() => {
-          // Fallback se "exact: environment" non è supportato
-          return navigator.mediaDevices.getUserMedia({
-            video: { facingMode: 'environment' },
-            audio: false
-          });
         });
 
         video.srcObject = stream;
         video.setAttribute("playsinline", true);
         await video.play();
 
-        // Inizializza ImageCapture sul track hardware principale
         const track = stream.getVideoTracks()[0];
         if ('ImageCapture' in window && track) {
           imageCapture = new ImageCapture(track);
@@ -169,25 +160,29 @@ RISPONDI ESCLUSIVAMENTE IN JSON VALIDO (senza backtick o markdown):
       let sourceImageBitmap;
 
       try {
-        // Scatto hardware nativo a piena fedeltà ottica
         if (imageCapture) {
-          const blob = await imageCapture.takePhoto();
+          // Forziamo la massima risoluzione del sensore fotografico (4000x3000)
+          const blob = await imageCapture.takePhoto({
+            imageWidth: 4000,
+            imageHeight: 3000
+          }).catch(() => imageCapture.takePhoto());
+          
           sourceImageBitmap = await createImageBitmap(blob);
         } else {
-          // Fallback canvas standard
           sourceImageBitmap = video;
         }
 
         const srcWidth = sourceImageBitmap.width || video.videoWidth;
         const srcHeight = sourceImageBitmap.height || video.videoHeight;
 
-        // Ritaglio panoramico 96% larghezza e 48% altezza
+        // Ritaglio panoramico 96% x 48% centrato
         const cropW = srcWidth * 0.96;
         const cropH = srcHeight * 0.48;
         const cropX = (srcWidth - cropW) / 2;
         const cropY = (srcHeight - cropH) / 2;
 
-        const targetWidth = 1600;
+        // Aumentiamo la risoluzione di output a 2400px per rendere i semi microscopici chiarissimi
+        const targetWidth = 2400;
         canvas.width = targetWidth;
         canvas.height = (cropH / cropW) * targetWidth;
 
@@ -198,10 +193,11 @@ RISPONDI ESCLUSIVAMENTE IN JSON VALIDO (senza backtick o markdown):
         ctx.drawImage(sourceImageBitmap, cropX, cropY, cropW, cropH, 0, 0, canvas.width, canvas.height);
         
         if (sourceImageBitmap.close) {
-          sourceImageBitmap.close(); // Libera la memoria della bitmap RAW
+          sourceImageBitmap.close();
         }
 
-        const base64Image = canvas.toDataURL('image/jpeg', 0.92).split(',')[1];
+        // Massima qualità di compressione per non sgranare i contorni
+        const base64Image = canvas.toDataURL('image/jpeg', 0.95).split(',')[1];
 
         btnAction.innerText = "ANALISI AI...";
 
@@ -219,7 +215,7 @@ RISPONDI ESCLUSIVAMENTE IN JSON VALIDO (senza backtick o markdown):
             generationConfig: {
               response_mime_type: "application/json",
               temperature: 0.0,
-              max_output_tokens: 250,
+              max_output_tokens: 300,
               thinking_config: { thinking_budget: 0 }
             }
           })
