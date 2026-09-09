@@ -81,27 +81,33 @@ L'immagine ritagliata è uno scatto RAW ad alta risoluzione del tavolo da poker 
 
 ANALISI OTTICA DELLA SITUAZIONE DI GIOCO:
 1. CARTE DI HERO (in basso al centro sopra Bluey4):
-   - Per ENTRAMBE le carte, LEGGI VALORE E SEME ESCLUSIVAMENTE DALL'INDICE NELL'ANGOLO IN ALTO A SINISTRA.
+   - Per ENTRAMBE le carte, LEGGI VALORE E SEME DALL'INDICE IN ALTO A SINISTRA.
    - REGOLA 4 COLORI: BLU=Quadri (♦/d), VERDE=Fiori (♣/c), ROSSO=Cuori (♥/h), NERO=Picche (♠/s).
+   - ORDINE CARTE: Non farti ingannare se la carta più bassa appare a sinistra (es. '5s As' o '3c Ah' sono mani Ax legittime: A5s e A3o!).
 2. BOARD AL CENTRO: Stessa regola a 4 colori (stringa vuota "" se pre-flop).
 3. RILEVAMENTO PUNTATE:
    - Sul bordo del tavolo, SUBITO A FIANCO DI CIASCUN BADGE GIOCATORE, rileva la pila di fiches con la cifra in BB.
-   - Calcola quanto costa a Hero fare CALL (differenza tra la puntata massima avversaria e le chip già messe da Hero).
+   - Calcola quanto costa a Hero fare CALL (differenza tra puntata massima avversaria e chip messe da Hero).
 4. POT TOTALE, STACK in BB e HUD Hand2Note (Alto=[Hands, VPIP] | Basso=[PFR, FCB]).
 
-REGOLE MATEMATICHE COGENTI (NO PASSIVITÀ, NO LIMP-FOLDING):
-1. PRE-FLOP DA SMALL BLIND (< 8 BB EFFETTIVI):
-   - PUSH O FOLD RIGIDO: È VIETATO FARE LIMP / CALL DA SMALL BLIND.
-   - OPEN-SHOVE (ALL-IN): Ax, Kx, coppie, Q6o+, Q2s+, J7o+, J4s+, T7o+, T6s+, 96s+, 87s.
-   - FOLD DIRETTO: Tutte le mani spazzatura offsuit o non connesse (es. 83s, 72o, 93o, T2o, J3o, Q2o-Q5o). MAI completare il mezzo buio con trash.
-2. PRE-FLOP DA BIG BLIND CONTRO LIMP (< 8 BB EFFETTIVI):
-   - ISO-SHOVE (ALL-IN) con Ax, Kx, Q9o+, Q6s+, coppie (anche 77, 66, ecc.), broadway (es. KJs, KTs, QJs).
-   - CHECK GRATUITO consentito SOLO con spazzatura pura (es. 83o, T4o).
-3. RISPOSTA AD ALL-IN AVVERSARIO (SHOVE) O RILANCI PRE-FLOP:
-   - Se per chiamare mancano > 2 BB: CHIAMA SOLO con mani di valore legittimo (Ax, KTs+, QJs+, coppie 55+). FOLD ASSOLUTO con spazzatura (es. 83s, J3o, Q2o).
-   - La regola "CALL 100% (Any Two Cards)" si applica SOLO ED ESCLUSIVAMENTE se per chiamare mancano letteralmente <= 1.5 BB (pot odds matematicamente irrinunciabili).
+REGOLE MATEMATICHE COGENTI (NO PASSIVITÀ, NO FOLD ASSURDI):
+1. REGOLA ASSI E BROADWAY PRE-FLOP (TUTTE LE POSIZIONI: BTN, SB, BB):
+   - Se hai in mano ALMENO UN ASSO (qualsiasi Ax, es: A2-AK, sia suited che offsuit), coppie, o Broadway (KQ, KJ, QJ): È RIGOROSAMENTE VIETATO FOLDARE A PIATTO NON APERTO.
+   - DA BUTTON (3-way non aperto):
+     * Con stack > 8 BB: RAISE A 2 BB standard con qualsiasi Ax, coppie, Broadway, suited connectors.
+     * Con stack <= 8 BB: OPEN-SHOVE (ALL-IN).
+   - DA SMALL BLIND (BTN foldato, Blind vs Blind):
+     * Con qualsiasi Ax, Kx, coppie, Broadway: MAI FOLDARE. Shove se <= 10 BB, Raise 2 BB se 10-15 BB.
+     * È VIETATO IL LIMP DA SMALL BLIND.
+     * FOLD da SB consentito SOLO su totale spazzatura (es: 83o, 72o, 93o, T2o, J3o).
+2. DA BIG BLIND CONTRO LIMP (< 8 BB EFFETTIVI):
+   - ISO-SHOVE (ALL-IN) con qualsiasi Ax, Kx, Q9o+, Q6s+, coppie (anche 77, 66, ecc.), Broadway (KJs, QJs).
+   - CHECK GRATUITO ammesso SOLO con marginali/trash (es. 83o, T4o).
+3. RISPOSTA AD ALL-IN AVVERSARIO (SHOVE) O RILANCI PESANTI:
+   - Se per chiamare mancano > 2 BB: CHIAMA SOLO con mani di valore legittimo (Ax, KTs+, QJs+, coppie 55+). FOLD con spazzatura (es. 83s, J3o, Q2o).
+   - "CALL 100% (Any Two Cards)" SOLO ED ESCLUSIVAMENTE se mancano <= 1.5 BB per chiamare.
 4. DIVIETO DI PEEL/FLOATING POST-FLOP (< 6 BB):
-   - Se un oppo punta e Hero non ha almeno Top Pair, Second Pair con buon kicker o draw a 8+ out (bilaterale o colore a 4 quinti), FOLD IMMEDIATO. MAI chiamare Flop e Turn con sola carta alta o coppie marginali per poi foldare dopo dissanguando lo stack.
+   - Se oppo punta e Hero non ha almeno Top Pair, Second Pair solida o draw reale a 8+ out, FOLD IMMEDIATO. MAI chiamare con sola carta alta per poi foldare dopo.
 5. HUD EXPLOIT:
    - Calling Station (VPIP >= 55%, diff >= 25) -> no bluff, 3 strade di valore pesanti.
    - Nit (VPIP <= 24%, o FCB >= 60% solo se Hands >= 25) -> c-bet 100% e steal allargato. Ignora FCB se Hands < 25.
@@ -109,7 +115,7 @@ REGOLE MATEMATICHE COGENTI (NO PASSIVITÀ, NO LIMP-FOLDING):
 RISPONDI ESCLUSIVAMENTE IN JSON VALIDO (senza backtick o markdown):
 {
   "mossa": "AZIONE CON SIZING",
-  "mie_carte": "Valore e seme Hero (es: '8c 3c')",
+  "mie_carte": "Valore e seme Hero (es: '5s As')",
   "board": "Carte board o stringa vuota",
   "dettaglio_tavolo": "Puntate rilevate + costo call BB + HUD sintesi"
 }`;
@@ -211,8 +217,6 @@ RISPONDI ESCLUSIVAMENTE IN JSON VALIDO (senza backtick o markdown):
         const srcWidth = sourceImageBitmap.width || video.videoWidth;
         const srcHeight = sourceImageBitmap.height || video.videoHeight;
 
-        // Larghezza al 96% per prendere tutto il tavolo da sinistra a destra
-        // Altezza al 40% per escludere bordi superiore/inferiore
         const cropW = srcWidth * 0.96;
         const cropH = srcHeight * 0.40;
         const cropX = (srcWidth - cropW) / 2;
