@@ -1,3 +1,4 @@
+```html
 <!DOCTYPE html>
 <html lang="it">
 <head>
@@ -82,12 +83,16 @@ L'immagine ritagliata è uno scatto RAW ad alta risoluzione del tavolo da poker 
 ANALISI OTTICA DELLA SITUAZIONE DI GIOCO:
 1. CARTE DI HERO (in basso al centro sopra Bluey4):
    - Per ENTRAMBE le carte, LEGGI VALORE E SEME DALL'INDICE IN ALTO A SINISTRA.
-   - REGOLA 4 COLORI: BLU=Quadri (♦/d), VERDE=Fiori (♣/c), ROSSO=Cuori (♥/h), NERO=Picche (♠/s).
+   - GUIDA FERREA DISAMBIGUAZIONE 4 COLORI (COLORE + FORMA):
+     * PICCHE (♠/s): NERO PURO o GRIGIO SCURO (mai bluastro). Forma a foglia rovesciata a punta in alto con piedistallo/stelo orizzontale in basso.
+     * QUADRI/MATTONI (♦/d): CELESTE o BLU ELETTRICO acceso. Forma a rombo/losanga regolare senza gambo. Se è scuro/nero è picche, se è celeste/blu vivo è quadri.
+     * CUORI (♥/h): ROSSO vivo. Due lobi arrotondati in alto e punta verso il basso.
+     * FIORI (♣/c): VERDE chiaro/smeraldo vivo. Tre lobi arrotondati (trifoglio) con stelo in basso.
    - ORDINE: 'As 2d' o '2d As' è A2o. Un Asso in mano rende SEMPRE la mano un Ax legittimo!
-2. BOARD AL CENTRO: Stessa regola a 4 colori (stringa vuota "" se pre-flop).
+2. BOARD AL CENTRO: Stessa regola cromatico-geometrica a 4 colori (stringa vuota "" se pre-flop).
 3. CALCOLO STACK EFFETTIVO (FONDAMENTALE):
    - Lo STACK EFFETTIVO è IL MINORE tra lo stack di Hero e lo stack dell'avversario coinvolto nella mano!
-   - Se Hero ha 640 chip (10.6 BB) e Oppo ha 260 chip (4.3 BB), lo STACK EFFETTIVO DELLA MANO È 4.3 BB! Tutte le decisioni dipendono da questo valore.
+   - Se Hero ha 640 chip (10.6 BB) e Oppo ha 260 chip (4.3 BB), lo STACK EFFETTIVO È 4.3 BB!
 4. RILEVAMENTO PUNTATE:
    - Distingui con cura: Piatto non aperto, Limp (1 BB), o Open-raise (>= 2 BB).
 
@@ -221,6 +226,7 @@ RISPONDI ESCLUSIVAMENTE IN JSON VALIDO (senza backtick o markdown):
         const srcWidth = sourceImageBitmap.width || video.videoWidth;
         const srcHeight = sourceImageBitmap.height || video.videoHeight;
 
+        // Inquadratura panoramica al 40% di altezza e 96% di larghezza
         const cropW = srcWidth * 0.96;
         const cropH = srcHeight * 0.40;
         const cropX = (srcWidth - cropW) / 2;
@@ -334,3 +340,5 @@ RISPONDI ESCLUSIVAMENTE IN JSON VALIDO (senza backtick o markdown):
   </script>
 </body>
 </html>
+
+```
