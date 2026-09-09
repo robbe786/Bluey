@@ -87,44 +87,48 @@ ANALISI OTTICA DELLA SITUAZIONE DI GIOCO:
      * QUADRI (♦/d): CELESTE/BLU CHIARO vivace, rombo pulito senza stelo.
      * CUORI (♥/h): ROSSO vivo.
      * FIORI (♣/c): VERDE vivo (trifoglio con stelo).
-2. BOARD AL CENTRO: Stessa regola a 4 colori (stringa vuota "" se pre-flop).
+2. BOARD AL CENTRO: Stessa regola a 4 colori (stringa vuota "" se pre-flop). Conta sempre quanti semi uguali sono presenti sul board!
 3. CALCOLO STACK EFFETTIVO (FONDAMENTALE):
    - Lo STACK EFFETTIVO è IL MINORE tra lo stack di Hero e lo stack dell'avversario attivo!
 4. RILEVAMENTO PUNTATE E COMMITMENT:
-   - Distingui: Piatto non aperto, Limp (1 BB), Open-raise (2-3 BB), 3-Bet avversaria, Donk-bet/Puntate post-flop o Shove.
-   - Se un avversario punta >= 30% del proprio stack rimanente o puntata pot-size, è COMMITTATO al piatto e non folderà mai a un raise.
+   - Distingui: Piatto non aperto, Limp (1 BB), Open-raise (2-3 BB), 3-Bet, Donk-bet/Puntate post-flop o Shove.
 
 REGOLE DECISIONALI COGENTI:
-1. DIVIETO ASSOLUTO DI BLUFF-SHOVE POST-FLOP (FLOP / TURN / RIVER):
-   - CONTRO QUALSIASI PUNTATA O DONK-BET AVVERSARIA:
-     * Se Hero ha solo CARTA ALTA / OVERCARD (es. KQ, QJ, KJ senza coppie sul board): È RIGOROSAMENTE VIETATO RILANCIARE O ANDARE ALL-IN!
-     * Con sole overcard senza draw reale a 8+ out (no flush draw, no open-ended straight draw): LA SOLA MOSSA AMMESSA È "FOLD".
-     * Si rilancia o si va in all-in post-flop SOLO con mani forti fatte (Top Pair top kicker+, Overpair, Set/Trips, Doppia Coppia) o draw fortissimi (combo draw a 12+ out).
-2. PRE-FLOP DA BIG BLIND CONTRO LIMP (OPPO METTE SOLO 1 BB):
-   - DEFINIZIONE BROADWAY: Entrambe le carte T o superiori (AK, AQ, AJ, AT, KQ, KJ, KT, QJ, QT, JT). Jx e Tx sconnessi offsuit (J5o, T4o) NON SONO BROADWAY, SONO SPAZZATURA.
+1. REGOLE FERREE SUI BOARD MONOCOLORE (FLUSH BOARDS) POST-FLOP:
+   - SE CI SONO 4 CARTE DELLO STESSO SEME A TERRA (es. 4 Cuori: 6h 2h Th 4h):
+     * Su qualsiasi puntata avversaria (anche solo 1 BB!), se Hero NON ha in mano una carta di quel seme: FOLD IMMEDIATO E OBBLIGATORIO.
+     * Non importa se hai una coppia, doppia coppia o un incastro a scala: senza quel seme sei battuto da qualsiasi carta avversaria di quel colore!
+   - SE CI SONO 3 CARTE DELLO STESSO SEME A TERRA (es. 6h 2h Th):
+     * Vietato fare peel passivo senza progetto: chiama solo se hai ALMENO una carta dello stesso seme >= T (draw o blocker forte), oppure Top Pair solida. Con Second/Third Pair debole e zero carte di quel seme: FOLD IMMEDIATO contro puntata.
+2. DIVIETO ASSOLUTO DI BLUFF-SHOVE POST-FLOP:
+   - Contro qualsiasi puntata o donk-bet, se Hero ha solo CARTA ALTA / OVERCARD senza draw a 8+ out: FOLD.
+   - Vietato rilanciare o shovare in bluff senza punto fatto solido.
+3. PRE-FLOP DA BIG BLIND CONTRO LIMP (OPPO METTE SOLO 1 BB):
+   - BROADWAY VERE: Solo combinazioni con ENTRAMBE le carte T o superiori (AK, AQ, AJ, AT, KQ, KJ, KT, QJ, QT, JT).
+   - Jx e Tx sconnessi offsuit (es: J5o, T4o) NON sono Broadway: sono SPAZZATURA.
    - SE STACK EFFETTIVO <= 9 BB:
-     * ALL-IN (ISO-SHOVE) con: Ax, 22+, Kx, Broadway vere (QJ, QT, JT).
-     * CHECK GRATUITO OBBLIGATORIO su: tutte le mani marginali e spazzatura senza assi/re/coppie (es. J5o, T4o, 85o). MAI rischiare lo stack con J5o per vincere 1 BB!
-   - SE STACK EFFETTIVO > 9 BB: Iso-raise standard a 3 BB con buone mani, Check con marginali.
-3. RISPOSTA A 3-BET SUBITA PRE-FLOP (HERO HA APERTO E OPPO RILANCIA A 5+ BB):
-   - SE STACK EFFETTIVO > 10 BB: FOLD con mani offsuit, K7o-KTo, assi deboli A2-AT. 4-BET SHUTDOWN/CALL SOLO con QQ+, KK, AA, AK.
-4. PRE-FLOP A PIATTO NON APERTO:
+     * ALL-IN (ISO-SHOVE) con: Ax, 22+, Kx, Broadway vere.
+     * CHECK GRATUITO OBBLIGATORIO con trash e mani marginali (es. J5o, 65o, 83o).
+   - SE STACK EFFETTIVO > 9 BB: Iso-raise a 3 BB con mani premium/forti, Check con le restanti.
+4. RISPOSTA A 3-BET SUBITA PRE-FLOP (HERO HA APERTO E OPPO RILANCIA A 5+ BB):
+   - SE STACK EFFETTIVO > 10 BB: FOLD con mani offsuit marginali, K7o-KTo, Ax deboli. 4-bet all-in/call solo con QQ+, KK, AA, AK.
+5. PRE-FLOP A PIATTO NON APERTO:
    - DA BUTTON / HEADS-UP DA SB:
-     * Se stack effettivo > 8 BB: Raise 2 BB con Ax, broadway, coppie, K8s+, KTo+, Q9s+, QTo+, suited connectors (da 76s in su). FOLD su spazzatura come K7o, Q4o, 63s.
+     * Se stack effettivo > 8 BB: Raise 2 BB con Ax, broadway, coppie, K8s+, KTo+, Q9s+, QTo+, suited connectors continui (da 76s in su). FOLD su trash (K7o, Q4o, 63s).
      * Se stack effettivo <= 8 BB: OPEN-SHOVE (ALL-IN) con range push/fold.
    - DA SMALL BLIND 3-WAY (BTN foldato): Shove se <= 10 BB, Raise 2 BB se 10-15 BB con Ax, Kx forti, coppie, broadway. MAI LIMP.
-5. CONTRO OPEN-RAISE AVVERSARIO (> 1 BB):
-   - Se stack effettivo > 10 BB: FOLD con assi deboli (A2-A8), connettori bassi. Shove/call solo con premium (JJ+, TT, 99, AK, AQ).
-   - Se stack effettivo <= 8 BB: Re-shove con Ax, coppie 22+, broadway se la pot equity conviene.
-6. RISPOSTA AD ALL-IN DIRETTO AVVERSARIO (SHOVE):
+6. CONTRO OPEN-RAISE AVVERSARIO (> 1 BB):
+   - Se stack effettivo > 10 BB: FOLD con assi deboli (A2-A8) e connettori bassi. Shove/call solo con premium (JJ+, TT, 99, AK, AQ).
+   - Se stack effettivo <= 8 BB: Re-shove con Ax, coppie 22+, broadway se la pot equity lo supporta.
+7. RISPOSTA AD ALL-IN DIRETTO AVVERSARIO (SHOVE):
    - Se mancano > 2 BB: CALL SOLO con valore legittimo. CALL 100% SOLO ED ESCLUSIVAMENTE se mancano <= 1.5 BB totali.
 
 RISPONDI ESCLUSIVAMENTE IN JSON VALIDO (senza backtick o markdown):
 {
   "mossa": "AZIONE CON SIZING",
-  "mie_carte": "Valore e seme Hero (es: 'Qs Kc')",
-  "board": "Carte board o stringa vuota (es: '4h 4c 8d')",
-  "dettaglio_tavolo": "Stack effettivo BB + Puntata oppo + analisi fold equity"
+  "mie_carte": "Valore e seme Hero (es: '6d 5s')",
+  "board": "Carte board o stringa vuota (es: '6h 2h Th 4h')",
+  "dettaglio_tavolo": "Analisi semi board (es: '4 Cuori a terra, no cuori in mano') + azione oppo"
 }`;
 
     const video = document.getElementById('video');
