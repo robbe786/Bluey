@@ -82,52 +82,49 @@ L'immagine ritagliata è uno scatto RAW ad alta risoluzione del tavolo da poker 
 ANALISI OTTICA DELLA SITUAZIONE DI GIOCO:
 1. CARTE DI HERO (in basso al centro sopra Bluey4):
    - Per ENTRAMBE le carte, LEGGI VALORE E SEME DALL'INDICE IN ALTO A SINISTRA.
-   - GUIDA FERREA DISAMBIGUAZIONE 4 COLORI (COLORE + FORMA):
-     * PICCHE (♠/s): NERO PURO o GRIGIO SCURO. Forma a foglia con punta in alto e stelo/base orizzontale in basso. Non confondere mai con i quadri.
-     * QUADRI/MATTONI (♦/d): CELESTE o BLU ELETTRICO chiaro acceso. Forma a rombo simmetrico senza base.
-     * CUORI (♥/h): ROSSO vivo. Due lobi arrotondati in alto e punta in basso.
-     * FIORI (♣/c): VERDE chiaro/smeraldo. Tre lobi arrotondati (trifoglio) con stelo in basso.
-   - ATTENZIONE ORDINE CARTE E COMBINAZIONE:
-     * '7d Ks' o 'Ks 7d' = K7o (offsuit se semi diversi!). K7o, K6o, K5o, K4o, K3o, K2o NON sono Kx giocabili deep: sono SPAZZATURA OFFSUIT.
+   - GUIDA DISAMBIGUAZIONE 4 COLORI:
+     * PICCHE (♠/s): NERO/GRIGIO SCURO, foglia a punta con base/stelo in basso.
+     * QUADRI (♦/d): CELESTE/BLU CHIARO vivace, rombo pulito senza stelo.
+     * CUORI (♥/h): ROSSO vivo.
+     * FIORI (♣/c): VERDE vivo (trifoglio con stelo).
 2. BOARD AL CENTRO: Stessa regola a 4 colori (stringa vuota "" se pre-flop).
 3. CALCOLO STACK EFFETTIVO (FONDAMENTALE):
    - Lo STACK EFFETTIVO è IL MINORE tra lo stack di Hero e lo stack dell'avversario attivo!
-   - Se Hero ha 290 e Oppo ha 300 su bui 10/20, lo stack effettivo è 14.5 BB.
-4. RILEVAMENTO PUNTATE:
-   - Distingui con cura: Piatto non aperto, Limp (1 BB), Open-raise (2-3 BB), 3-BET PESANTE (avversario rilancia a 5+ BB contro un raise di Hero), o Shove All-in.
+4. RILEVAMENTO PUNTATE E COMMITMENT:
+   - Distingui: Piatto non aperto, Limp (1 BB), Open-raise (2-3 BB), 3-Bet avversaria, Donk-bet/Puntate post-flop o Shove.
+   - Se un avversario punta >= 30% del proprio stack rimanente o puntata pot-size, è COMMITTATO al piatto e non folderà mai a un raise.
 
 REGOLE DECISIONALI COGENTI:
-1. RISPOSTA A 3-BET SUBITA PRE-FLOP (HERO HA APERTO E UN OPPOSTO CONTRO-RILANCIA A 5+ BB):
-   - SE LO STACK EFFETTIVO > 10 BB:
-     * FOLD ISTANTANEO con mani marginali e offsuit: K7o, K8o, K9o, QTo, JTo, assi deboli A2o-ATo, e connettori bassi. MAI fare 4-bet shove suicida con K7o o A2-A8!
-     * 4-BET ALL-IN / CALL SOLO con monster assolute: QQ+, KK, AA, AKs, AKo.
-2. PRE-FLOP A PIATTO NON APERTO (NESSUN RILANCIO PRIMA DI HERO):
-   - DA BUTTON / HEADS-UP DA SB:
-     * Se stack effettivo > 8 BB: Raise 2 BB SOLO con Ax, broadway pure (KQ, KJ, QJ), coppie, K8s+, KTo+, Q9s+, QTo+, connettori adiacenti (da 76s in su). FOLD DIRETTO su K2o-K8o, Q2o-Q8o, 63s, trash vario.
-     * Se stack effettivo <= 8 BB: OPEN-SHOVE (ALL-IN) con range push/fold.
-   - DA SMALL BLIND 3-WAY (BTN foldato):
-     * Ax, Kx forti, coppie, Broadway: Shove se <= 10 BB, Raise 2 BB se 10-15 BB. MAI LIMP. FOLD su trash puro.
-3. PRE-FLOP DA BIG BLIND CONTRO LIMP (OPPO LIMPA 1 BB):
+1. DIVIETO ASSOLUTO DI BLUFF-SHOVE POST-FLOP (FLOP / TURN / RIVER):
+   - CONTRO QUALSIASI PUNTATA O DONK-BET AVVERSARIA:
+     * Se Hero ha solo CARTA ALTA / OVERCARD (es. KQ, QJ, KJ senza coppie sul board): È RIGOROSAMENTE VIETATO RILANCIARE O ANDARE ALL-IN!
+     * Con sole overcard senza draw reale a 8+ out (no flush draw, no open-ended straight draw): LA SOLA MOSSA AMMESSA È "FOLD".
+     * Si rilancia o si va in all-in post-flop SOLO con mani forti fatte (Top Pair top kicker+, Overpair, Set/Trips, Doppia Coppia) o draw fortissimi (combo draw a 12+ out).
+2. PRE-FLOP DA BIG BLIND CONTRO LIMP (OPPO METTE SOLO 1 BB):
+   - DEFINIZIONE BROADWAY: Entrambe le carte T o superiori (AK, AQ, AJ, AT, KQ, KJ, KT, QJ, QT, JT). Jx e Tx sconnessi offsuit (J5o, T4o) NON SONO BROADWAY, SONO SPAZZATURA.
    - SE STACK EFFETTIVO <= 9 BB:
-     * ALL-IN (ISO-SHOVE) OBBLIGATORIO con qualsiasi Asso (Ax: A2-AK sia suited che offsuit), qualsiasi coppia (22+), Kx, broadway. VIETATO IL CHECK PASSIVO CON AX.
-     * CHECK solo con totale trash senza assi né re (es. 83o, T4o, 72o).
-   - SE STACK EFFETTIVO > 9 BB:
-     * Iso-raise standard a 3 BB con buone mani, check con marginali.
-4. CONTRO OPEN-RAISE AVVERSARIO (> 1 BB):
-   - Se stack effettivo > 10 BB: FOLD con assi deboli (A2-A8), connettori bassi e broadway deboli. 3-bet shove/call SOLO con JJ+, TT, 99, AK, AQ, AJs.
-   - Se stack effettivo <= 8 BB: Re-shove con Ax, coppie 22+, broadway se la pot equity lo supporta.
-5. RISPOSTA AD ALL-IN DIRETTO AVVERSARIO (SHOVE):
-   - Se per chiamare mancano > 2 BB: CALL SOLO con valore reale (coppie, Ax, broadway alte).
-   - CALL 100% (Any Two Cards) SOLO ED ESCLUSIVAMENTE se mancano letteralmente <= 1.5 BB per chiamare.
-6. DIVIETO DI PEEL/FLOATING POST-FLOP (< 6 BB):
-   - Se oppo punta e Hero non ha almeno Top Pair, Second Pair solida o draw a 8+ out, FOLD IMMEDIATO.
+     * ALL-IN (ISO-SHOVE) con: Ax, 22+, Kx, Broadway vere (QJ, QT, JT).
+     * CHECK GRATUITO OBBLIGATORIO su: tutte le mani marginali e spazzatura senza assi/re/coppie (es. J5o, T4o, 85o). MAI rischiare lo stack con J5o per vincere 1 BB!
+   - SE STACK EFFETTIVO > 9 BB: Iso-raise standard a 3 BB con buone mani, Check con marginali.
+3. RISPOSTA A 3-BET SUBITA PRE-FLOP (HERO HA APERTO E OPPO RILANCIA A 5+ BB):
+   - SE STACK EFFETTIVO > 10 BB: FOLD con mani offsuit, K7o-KTo, assi deboli A2-AT. 4-BET SHUTDOWN/CALL SOLO con QQ+, KK, AA, AK.
+4. PRE-FLOP A PIATTO NON APERTO:
+   - DA BUTTON / HEADS-UP DA SB:
+     * Se stack effettivo > 8 BB: Raise 2 BB con Ax, broadway, coppie, K8s+, KTo+, Q9s+, QTo+, suited connectors (da 76s in su). FOLD su spazzatura come K7o, Q4o, 63s.
+     * Se stack effettivo <= 8 BB: OPEN-SHOVE (ALL-IN) con range push/fold.
+   - DA SMALL BLIND 3-WAY (BTN foldato): Shove se <= 10 BB, Raise 2 BB se 10-15 BB con Ax, Kx forti, coppie, broadway. MAI LIMP.
+5. CONTRO OPEN-RAISE AVVERSARIO (> 1 BB):
+   - Se stack effettivo > 10 BB: FOLD con assi deboli (A2-A8), connettori bassi. Shove/call solo con premium (JJ+, TT, 99, AK, AQ).
+   - Se stack effettivo <= 8 BB: Re-shove con Ax, coppie 22+, broadway se la pot equity conviene.
+6. RISPOSTA AD ALL-IN DIRETTO AVVERSARIO (SHOVE):
+   - Se mancano > 2 BB: CALL SOLO con valore legittimo. CALL 100% SOLO ED ESCLUSIVAMENTE se mancano <= 1.5 BB totali.
 
 RISPONDI ESCLUSIVAMENTE IN JSON VALIDO (senza backtick o markdown):
 {
   "mossa": "AZIONE CON SIZING",
-  "mie_carte": "Valore e seme Hero (es: '7d Ks')",
-  "board": "Carte board o stringa vuota",
-  "dettaglio_tavolo": "Stack effettivo BB + Azione avversario (es: '3-bet oppo a 7.5 BB') + costo call"
+  "mie_carte": "Valore e seme Hero (es: 'Qs Kc')",
+  "board": "Carte board o stringa vuota (es: '4h 4c 8d')",
+  "dettaglio_tavolo": "Stack effettivo BB + Puntata oppo + analisi fold equity"
 }`;
 
     const video = document.getElementById('video');
@@ -227,6 +224,7 @@ RISPONDI ESCLUSIVAMENTE IN JSON VALIDO (senza backtick o markdown):
         const srcWidth = sourceImageBitmap.width || video.videoWidth;
         const srcHeight = sourceImageBitmap.height || video.videoHeight;
 
+        // Inquadratura panoramica al 40% di altezza e 96% di larghezza
         const cropW = srcWidth * 0.96;
         const cropH = srcHeight * 0.40;
         const cropX = (srcWidth - cropW) / 2;
