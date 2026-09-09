@@ -83,50 +83,45 @@ ANALISI OTTICA DELLA SITUAZIONE DI GIOCO:
 1. CARTE DI HERO (in basso al centro sopra Bluey4):
    - Per ENTRAMBE le carte, LEGGI VALORE E SEME DALL'INDICE IN ALTO A SINISTRA.
    - REGOLA 4 COLORI: BLU=Quadri (♦/d), VERDE=Fiori (♣/c), ROSSO=Cuori (♥/h), NERO=Picche (♠/s).
-   - ORDINE: Es. 'Ad 2d' o '2d Ad' è la stessa mano (A2s).
+   - ORDINE: 'As 2d' o '2d As' è A2o. Un Asso in mano rende SEMPRE la mano un Ax legittimo!
 2. BOARD AL CENTRO: Stessa regola a 4 colori (stringa vuota "" se pre-flop).
-3. RILEVAMENTO PUNTATE:
-   - Sul bordo del tavolo, SUBITO A FIANCO DI CIASCUN BADGE GIOCATORE, rileva la pila di fiches con la cifra in BB.
-   - Calcola quanto costa a Hero fare CALL (differenza tra puntata massima avversaria e chip messe da Hero).
-   - DISTINGUI RIGOROSAMENTE TRA:
-     * Piatto NON APERTO (nessun rilancio prima di Hero)
-     * Piatto con LIMP (oppo ha messo solo 1 BB)
-     * Piatto con RILANCIO/OPEN-RAISE (oppo ha puntato 2 BB, 2.5 BB, 3 BB o più).
-4. POT TOTALE, STACK in BB e HUD Hand2Note (Alto=[Hands, VPIP] | Basso=[PFR, FCB]).
+3. CALCOLO STACK EFFETTIVO (FONDAMENTALE):
+   - Lo STACK EFFETTIVO è IL MINORE tra lo stack di Hero e lo stack dell'avversario coinvolto nella mano!
+   - Se Hero ha 640 chip (10.6 BB) e Oppo ha 260 chip (4.3 BB), lo STACK EFFETTIVO DELLA MANO È 4.3 BB! Tutte le decisioni dipendono da questo valore.
+4. RILEVAMENTO PUNTATE:
+   - Distingui con cura: Piatto non aperto, Limp (1 BB), o Open-raise (>= 2 BB).
 
-REGOLE DECISIONALI COGENTI (NO SHOCK PRE-FLOP, NO 3-BET SUICIDE):
-1. PRE-FLOP CONTRO OPEN-RAISE AVVERSARIO (UN AVVERSARIO HA GIÀ RILANCIATO > 1 BB):
-   - SE STACK HERO > 10 BB (FASE INIZIALE O DEEP):
-     * FOLD OBBLIGATORIO con assi deboli offsuit e suited marginali (A2s-A8s, A2o-ATo), mani speculative e broadway basse (QJ, KT). MAI fare 3-bet all-in suicida per 15 BB con A2-A8!
-     * 3-BET SHOVE / CALL solo con mani premium legittime (JJ+, TT, 99, AK, AQ, AJs).
-   - SE STACK HERO <= 8 BB:
-     * Con < 8 BB puoi re-shovare con Ax, coppie 22+, broadway se la pot equity lo giustifica.
-2. PRE-FLOP A PIATTO NON APERTO (NESSUNO HA RILANCIATO PRIMA DI HERO):
-   - DA BUTTON:
-     * Con stack > 8 BB: RAISE A 2 BB con Ax, Broadway, coppie, suited connectors.
-     * Con stack <= 8 BB: OPEN-SHOVE (ALL-IN) con range push/fold.
-   - DA SMALL BLIND (BTN foldato, Blind vs Blind):
-     * Con qualsiasi Ax, Kx, coppie, Broadway: MAI FOLDARE. Shove se <= 10 BB, Raise 2 BB se 10-15 BB.
-     * FOLD da SB consentito solo su totale spazzatura (es: 83o, 72o, 93o, T2o, J3o).
-     * VIETATO IL LIMP DA SMALL BLIND.
-3. PRE-FLOP DA BIG BLIND CONTRO LIMP (OPPO METTE SOLO 1 BB):
-   - Se stack < 8 BB: ISO-SHOVE (ALL-IN) con Ax, Kx, Q9o+, Q6s+, coppie (anche 77, 66), broadway (KJs, QJs).
-   - CHECK GRATUITO ammesso SOLO con marginali/trash (es. 83o, T4o).
+REGOLE DECISIONALI COGENTI (NO CHECK PASSIVI SU LIMP CON ASSI):
+1. PRE-FLOP DA BIG BLIND CONTRO LIMP (OPPO LIMPA 1 BB DA SB O BTN):
+   - SE STACK EFFETTIVO <= 9 BB:
+     * CON QUALSIASI ASSO (Ax: A2-AK, sia suited che offsuit), qualsiasi coppia (22+), Kx, Q8s+, Q9o+, broadway: È RIGOROSAMENTE VIETATO FARE CHECK! LA MOSSA OBBLIGATORIA È "ALL-IN (ISO-SHOVE)".
+     * Il CHECK gratuito è riservato ESCLUSIVAMENTE a pura spazzatura priva di assi/re/coppie (es. 83o, T4o, 72o, 93o).
+   - SE STACK EFFETTIVO > 9 BB:
+     * Rilancio di isolamento standard a 3 BB con Ax forti, coppie e broadway. Check con mani deboli o connettori bassi.
+2. PRE-FLOP A PIATTO NON APERTO (NESSUNO HA PUNTATO PRIMA DI HERO):
+   - DA BUTTON / HEADS-UP DA SB:
+     * Se stack effettivo <= 8 BB: OPEN-SHOVE (ALL-IN) con Ax, Kx, Q6s+, Q7o+, coppie.
+     * Se stack effettivo > 8 BB: Raise 2 BB con Ax, broadway, coppie, suited connectors (da 76s in su). FOLD spazzatura come 63s o Q4o.
+   - DA SMALL BLIND 3-WAY (BTN foldato):
+     * Ax, Kx, coppie, Broadway: Shove se <= 10 BB, Raise 2 BB se 10-15 BB. MAI LIMP da SB. FOLD su trash puro.
+3. CONTRO OPEN-RAISE AVVERSARIO (> 1 BB):
+   - Se stack effettivo > 10 BB: FOLD con assi deboli (A2-A8), mani sconnesse e broadway deboli. 3-bet shove/call SOLO con premium (JJ+, TT, 99, AK, AQ, AJs).
+   - Se stack effettivo <= 8 BB: Re-shove con Ax, coppie 22+, broadway se la pot equity lo impone.
 4. RISPOSTA AD ALL-IN DIRETTO AVVERSARIO (SHOVE):
-   - Se per chiamare mancano > 2 BB: CHIAMA SOLO con mani di valore legittimo (Ax, KTs+, QJs+, coppie 55+). FOLD con spazzatura (es. 83s, J3o, Q2o).
-   - "CALL 100% (Any Two Cards)" SOLO ED ESCLUSIVAMENTE se mancano letteralmente <= 1.5 BB per chiamare.
+   - Se per chiamare mancano > 2 BB: CALL SOLO con valore legittimo (coppie, Ax, KTs+, QJs+). FOLD su trash.
+   - CALL 100% (Any Two Cards) SOLO ED ESCLUSIVAMENTE se mancano letteralmente <= 1.5 BB per chiamare.
 5. DIVIETO DI PEEL/FLOATING POST-FLOP (< 6 BB):
-   - Se oppo punta e Hero non ha almeno Top Pair, Second Pair solida o draw reale a 8+ out, FOLD IMMEDIATO. MAI chiamare con sola carta alta per poi foldare dopo.
+   - Se oppo punta e Hero non ha almeno Top Pair, Second Pair solida o draw a 8+ out, FOLD IMMEDIATO.
 6. HUD EXPLOIT:
-   - Calling Station (VPIP >= 55%, diff >= 25) -> no bluff, 3 strade di valore pesanti.
-   - Nit (VPIP <= 24%, o FCB >= 60% solo se Hands >= 25) -> c-bet 100% e steal allargato. Ignora FCB se Hands < 25.
+   - Calling Station (VPIP >= 55%, diff >= 25) -> no bluff, valore massimo.
+   - Nit (VPIP <= 24%, o FCB >= 60% con Hands >= 25) -> c-bet 100% e steal spietato.
 
 RISPONDI ESCLUSIVAMENTE IN JSON VALIDO (senza backtick o markdown):
 {
   "mossa": "AZIONE CON SIZING",
-  "mie_carte": "Valore e seme Hero (es: 'Ad 2d')",
+  "mie_carte": "Valore e seme Hero (es: 'As 2d')",
   "board": "Carte board o stringa vuota",
-  "dettaglio_tavolo": "Azione avversari (es: 'BTN apre 3 BB') + costo call + HUD"
+  "dettaglio_tavolo": "Stack effettivo BB + Azione avversario + costo call"
 }`;
 
     const video = document.getElementById('video');
@@ -226,7 +221,6 @@ RISPONDI ESCLUSIVAMENTE IN JSON VALIDO (senza backtick o markdown):
         const srcWidth = sourceImageBitmap.width || video.videoWidth;
         const srcHeight = sourceImageBitmap.height || video.videoHeight;
 
-        // Inquadratura panoramica al 40% di altezza
         const cropW = srcWidth * 0.96;
         const cropH = srcHeight * 0.40;
         const cropX = (srcWidth - cropW) / 2;
