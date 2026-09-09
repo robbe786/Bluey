@@ -14,7 +14,7 @@
       position: absolute; 
       border: 2px dashed rgba(255,255,255,0.7); 
       width: 96%; 
-      height: 48%; 
+      height: 40%; 
       pointer-events: none; 
       border-radius: 8px; 
       box-shadow: 0 0 0 9999px rgba(0,0,0,0.6); 
@@ -211,8 +211,10 @@ RISPONDI ESCLUSIVAMENTE IN JSON VALIDO (senza backtick o markdown):
         const srcWidth = sourceImageBitmap.width || video.videoWidth;
         const srcHeight = sourceImageBitmap.height || video.videoHeight;
 
+        // Larghezza al 96% per prendere tutto il tavolo da sinistra a destra
+        // Altezza al 40% per escludere bordi superiore/inferiore
         const cropW = srcWidth * 0.96;
-        const cropH = srcHeight * 0.48;
+        const cropH = srcHeight * 0.40;
         const cropX = (srcWidth - cropW) / 2;
         const cropY = (srcHeight - cropH) / 2;
 
