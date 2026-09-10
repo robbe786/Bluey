@@ -10,7 +10,7 @@
     #camera-container { flex: 1 1 auto; min-height: 0; position: relative; background: #000; overflow: hidden; display: flex; justify-content: center; align-items: center; }
     video { width: 100%; height: 100%; object-fit: cover; }
     
-    /* TUO OVERLAY ORIGINALE CALIBRATO (40% altezza, 96% larghezza) */
+    /* OVERLAY CALIBRATO SUL TREPPIEDE (40% altezza, 96% larghezza) */
     #overlay-box { 
       position: absolute; 
       border: 2px dashed rgba(255,255,255,0.7); 
@@ -90,10 +90,18 @@ POSIZIONI:
 - HEADS-UP (2 giocatori rimasti): Chi mette 0.5 BB (o nulla pre-flop) e agisce per primo e' BTN/SB. Chi mette 1 BB e' BB.
 - 3-WAY (3 giocatori attivi): Hero 1 BB = BB. Hero 0.5 BB = SB. Hero 0 BB prima di agire = BTN.
 
-STRATEGIA GTO:
-- Contro ALL-IN (>= 10 BB o etichetta 'All In'): FOLD immediato con trash, connettori bassi, Kx deboli, assi deboli. CALL solo con monster (JJ+, AKs, AKo).
-- Pre-flop non aperto <= 8 BB: Solo Push o Fold. Shove con Ax, broadway, coppie, Kx forti. Fold trash.
-- Pre-flop non aperto > 8 BB: Raise 2 BB con range solido, fold trash.
+STRATEGIA GTO PRE-FLOP & POST-FLOP:
+1. CONTRO ALL-IN AVVERSARIO (>= 10 BB o etichetta 'All In'):
+   - FOLD immediato con trash, connettori bassi, Kx deboli, assi deboli (fino ad A8o).
+   - CALL solo con monster: JJ+, QQ, KK, AA, AKs, AKo (e AQs a stack corto).
+2. CONTRO LIMP (piatto aperto da 1 BB prima di Hero):
+   - Se lo stack effettivo del limper e' <= 10 BB: MAI rilanciare a 2x-3x. Solo ALL-IN diretto con mani di valore (Ax forti, Broadway, coppie 22+). FOLD o CHECK su trash.
+   - Se stack limper > 10 BB: ISO-Raise 3 BB in posizione, 3.5 BB da SB.
+3. PIATTO NON APERTO (nessun rilancio/limp prima di Hero):
+   - Se stack effettivo <= 8 BB: Solo Push o Fold. Shove con Ax, Broadway, coppie, Kx forti. Fold trash.
+   - Se stack effettivo > 8 BB: Raise 2 BB con range GTO solido. Fold trash.
+4. POST-FLOP:
+   - Se Hero non ha legato nulla (nessuna coppia, nessun progetto solido) e subisce puntata/all-in: FOLD immediato.
 
 Rispondi con un JSON valido con questo formato:
 {"mossa": "...", "mie_carte": "...", "board": "...", "dettaglio_tavolo": "..."}`;
@@ -196,7 +204,6 @@ Rispondi con un JSON valido con questo formato:
 
         btnAction.innerText = "ANALISI AI...";
 
-        // CHIAMATA REST ROBUSTA SENZA PARAMETRI AMBIGUI
         const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-3.6-flash:generateContent?key=${apiKey}`, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
@@ -216,7 +223,6 @@ Rispondi con un JSON valido con questo formato:
 
         const data = await response.json();
 
-        // GESTIONE TRASPARENTE DEGLI ERRORI REST
         if (data.error) {
           throw new Error(data.error.message || `Errore HTTP ${data.error.code}`);
         }
@@ -232,7 +238,6 @@ Rispondi con un JSON valido con questo formato:
         try {
           parsed = JSON.parse(rawText);
         } catch (e) {
-          // Ricerca difensiva tra le graffe se ci sono residui
           const start = rawText.indexOf('{');
           const end = rawText.lastIndexOf('}');
           if (start !== -1 && end !== -1 && end > start) {
