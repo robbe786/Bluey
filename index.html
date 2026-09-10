@@ -86,8 +86,8 @@ REGOLE SEMI (MAZZO A 4 COLORI POKERSTARS):
 Non confondere Fiori (verde) con Picche (nero).
 
 POSIZIONI:
-- HEADS-UP (2 giocatori): Chi mette 0.5 BB (o nulla pre-flop) e agisce per primo e' BTN/SB. Chi mette 1 BB e' BB.
-- 3-WAY (3 giocatori): Hero 1 BB = BB. Hero 0.5 BB = SB. Hero 0 BB prima di agire = BTN.
+- HEADS-UP (2 giocatori rimasti): Chi mette 0.5 BB (o nulla pre-flop) e agisce per primo e' BTN/SB. Chi mette 1 BB e' BB.
+- 3-WAY (3 giocatori attivi): Hero 1 BB = BB. Hero 0.5 BB = SB. Hero 0 BB prima di agire = BTN.
 
 STRATEGIA:
 - Contro ALL-IN (>= 10 BB o etichetta 'All In'): FOLD immediato con trash, connettori bassi, Kx deboli, assi fino ad A8o. CALL solo con monster (JJ+, AKs, AKo).
@@ -178,7 +178,7 @@ Compila obbligatoriamente un oggetto JSON con queste 4 chiavi:
         const srcWidth = video.videoWidth;
         const srcHeight = video.videoHeight;
 
-        // Crop originale: 96% larghezza, 40% altezza
+        // Crop calibrato sul treppiede: 96% larghezza, 40% altezza
         const cropW = srcWidth * 0.96;
         const cropH = srcHeight * 0.40;
         const cropX = (srcWidth - cropW) / 2;
@@ -208,14 +208,17 @@ Compila obbligatoriamente un oggetto JSON con queste 4 chiavi:
             contents: [{
               role: "user",
               parts: [
-                { text: "Identifica carte, posizione e definisci la mossa ottimale." },
+                { text: "Analizza il tavolo e restituisci esclusivamente l'oggetto JSON con la mossa GTO." },
                 { inlineData: { mimeType: "image/jpeg", data: base64Image } }
               ]
             }],
             generationConfig: {
               responseMimeType: "application/json",
               temperature: 0.1,
-              maxOutputTokens: 400
+              maxOutputTokens: 800,
+              thinkingConfig: {
+                thinkingBudget: 0
+              }
             }
           })
         });
@@ -223,16 +226,23 @@ Compila obbligatoriamente un oggetto JSON con queste 4 chiavi:
         const data = await response.json();
         if (data.error) throw new Error(data.error.message || "Errore API");
 
-        const rawText = data.candidates?.[0]?.content?.parts?.[0]?.text;
-        if (!rawText) throw new Error("Risposta vuota dal modello.");
+        const candidate = data.candidates?.[0];
+        if (!candidate || !candidate.content?.parts?.[0]?.text) {
+          throw new Error("Nessun output ricevuto dal modello.");
+        }
 
-        // Estrazione difensiva del blocco JSON
+        const rawText = candidate.content.parts[0].text.trim();
+
         let parsed;
-        const jsonMatch = rawText.match(/\{[\s\S]*\}/);
-        if (jsonMatch) {
-          parsed = JSON.parse(jsonMatch[0]);
-        } else {
+        try {
           parsed = JSON.parse(rawText);
+        } catch (e) {
+          const match = rawText.match(/\{[\s\S]*\}/);
+          if (match) {
+            parsed = JSON.parse(match[0]);
+          } else {
+            throw new Error("Formato risposta non valido.");
+          }
         }
 
         decisionEl.innerText = parsed.mossa || "INFO";
