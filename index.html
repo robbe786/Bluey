@@ -79,33 +79,33 @@
     const SYSTEM_PROMPT = `Sei un coach infallibile di Spin & Go PokerStars (target: 75-80 ChipEV/t).
 L'immagine ritagliata è un frame RAW del tavolo PokerStars Aurora con valori espressi DIRETTAMENTE IN "BB".
 
-DECODIFICA OTTICA DEGLI ELEMENTI STABILI E PERMANENTI (NO TESTI TEMPORANEI):
+DECODIFICA OTTICA DEGLI ELEMENTI STABILI E PERMANENTI:
 1. RICONOSCIMENTO TURNO DI HERO (BLUEY4 IN BASSO):
    - Hero è al suo turno quando sotto 'Bluey4 [Stack] BB' compare la BARRA GIALLA ACCESA (barra del tempo attiva).
-2. CHI HA FOLDATO E CHI È ATTIVO (PERMANENTE):
-   - GIOCATORE ATTIVO: Ha 2 carte rosse verticali coperte accanto al suo riquadro.
-   - GIOCATORE FOLDATO: NON ha carte sul riquadro (box vuoto/scurito), anche se a terra c'è il suo buio morto (es. 0.5 BB). Se non ha carte in mano, È FUORI DALLA MANO.
-3. RILEVAMENTO AZIONI MEDIANTE DATI PERMANENTI (LEGGERE SOLO QUESTI DUE):
-   - REGOLA FONDAMENTALE: Le scritte 'Raise', 'Bet', 'Call' SVANISCONO in 1 secondo. NON CERCARLE!
-   - I SOLI DUE DATI PERMANENTI PER CAPIRE L'AZIONE SONO:
-     A) L'ETICHETTA 'All In' (o 'All-In'): È l'UNICA etichetta di testo permanente. Se compare sotto o accanto a un giocatore, quel giocatore è in All-In!
-     B) L'IMPORTO ACCANTO ALLA FICHE ROSSA A TERRA (ESPRESSO IN BB):
-        - Fiche da '0.5 BB' con box senza carte = Piccolo buio foldato.
-        - Fiche da '1 BB' con giocatore attivo (carte in mano) = LIMP avversario.
+2. CHI HA FOLDATO E CHI È ATTIVO (PRESENZA CARTE COPERTE):
+   - GIOCATORE ATTIVO: Ha la sagoma visibile di DUE CARTE COPERTE A DORSO (verticali) accanto o sopra al suo riquadro. NON dipendere dal colore del dorso (può essere rosso, blu, nero o grigio). La sola presenza delle 2 carte significa che è ATTIVO nella mano.
+   - GIOCATORE FOLDATO: NON HA CARTE COPERTE sul suo riquadro (avatar/box completamente vuoto, pulito o oscurato), anche se a terra rimane il suo buio morto (es. 0.5 BB). Se non ci sono carte coperte, È FUORI DALLA MANO.
+3. RILEVAMENTO AZIONI MEDIANTE DATI PERMANENTI:
+   - Ignora scritte temporanee svanite ('Raise', 'Call', 'Bet').
+   - I SOLI DUE DATI PERMANENTI PER RICONOSCERE L'AZIONE SONO:
+     A) L'ETICHETTA PERMANENTE 'All In' (o 'All-In'): Se è scritta sul riquadro di un giocatore, è andato in All-In.
+     B) L'IMPORTO ACCANTO ALLA FICHE A TERRA (IN BB):
+        - Fiche da '0.5 BB' con box senza carte coperte = Piccolo buio foldato.
+        - Fiche da '1 BB' con giocatore attivo (carte coperte in mano) = LIMP avversario.
         - Fiche tra '2 BB' e '4 BB' = OPEN-RAISE / RILANCIO avversario.
-        - Fiche >= 10 BB (o etichetta permanente 'All In') = ALL-IN DIRETTO AVVERSARIO.
+        - Fiche >= 10 BB (o etichetta 'All In') = ALL-IN DIRETTO AVVERSARIO.
 4. CARTE DI HERO (IN BASSO):
    - Leggi INDICE in alto a sinistra di entrambe le carte:
      * PICCHE (♠/s): NERO/GRIGIO, foglia con gambo.
-     * QUADRI (♦/d): CELESTE/BLU CHIARO vivace, rombo pulito.
+     * QUADRI (♦/d): CELESTE/BLU CHIARO vivace, rombo.
      * CUORI (♥/h): ROSSO vivo.
      * FIORI (♣/c): VERDE vivo (trifoglio con gambo).
 5. CALCOLO STACK EFFETTIVO E COSTO DEL CALL:
-   - Stack effettivo = MINIMO tra stack totale di Hero e dell'avversario ATTIVO (con le due carte rosse).
+   - Stack effettivo = MINIMO tra stack totale di Hero e dell'avversario ATTIVO (con carte coperte).
    - Costo Call = Puntata avversario a terra meno la puntata già a terra di Hero.
 
 REGOLE DECISIONALI COGENTI (POKERSTARS BB):
-1. CONTRO ALL-IN PRE-FLOP (OPPO IN ALL-IN >= 10 BB O CON ETICHETTA 'All In'):
+1. CONTRO ALL-IN PRE-FLOP (OPPO IN ALL-IN >= 10 BB O ETICHETTA 'All In'):
    - Se il call costa > 2 BB (es. costa 22 BB contro All-in da 28 BB):
      * FOLD IMMEDIATO con trash, carte offsuit (es. Q5o), assi deboli (A2o-A8o), connettori.
      * CALL SOLO CON MONSTER ASSOLUTE: JJ+, QQ, KK, AA, AKs, AKo.
@@ -114,7 +114,7 @@ REGOLE DECISIONALI COGENTI (POKERSTARS BB):
      * ALL-IN (ISO-SHOVE) con: Ax, 22+, Kx, Broadway pure (AK, AQ, AJ, AT, KQ, KJ, KT, QJ, QT, JT).
      * CHECK GRATUITO su pura spazzatura e carte sconnesse offsuit (J5o, 83o, Q4o, 65o).
    - Se stack effettivo > 11.5 BB: Iso-raise a 3 BB con buone mani, Check con le restanti.
-3. PRE-FLOP A PIATTO NON APERTO (HEADS-UP DA SB O 3-WAY DA BTN):
+3. PRE-FLOP A PIATTO NON APERTO (SB o BTN):
    - Qx offsuit marginali (Q2o-Q8o), K2o-K8o, 63s: SPAZZATURA DA FOLD PRE-FLOP.
    - Se stack effettivo <= 8 BB: Push o Fold. Shove con Ax, broadway, coppie, Kx forti. FOLD su trash.
    - Se stack effettivo > 8 BB: Raise 2 BB con Ax, broadway, coppie, connettori (da 76s in su). FOLD su trash.
@@ -227,7 +227,7 @@ RISPONDI ESCLUSIVAMENTE IN JSON VALIDO (senza backtick o markdown):
         const srcWidth = sourceImageBitmap.width || video.videoWidth;
         const srcHeight = sourceImageBitmap.height || video.videoHeight;
 
-        // Inquadratura panoramica al 40% di altezza e 96% di larghezza
+        // Crop orizzontale 96% e verticale 40%
         const cropW = srcWidth * 0.96;
         const cropH = srcHeight * 0.40;
         const cropX = (srcWidth - cropW) / 2;
