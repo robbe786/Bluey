@@ -10,7 +10,7 @@
     #camera-container { flex: 1 1 auto; min-height: 0; position: relative; background: #000; overflow: hidden; display: flex; justify-content: center; align-items: center; }
     video { width: 100%; height: 100%; object-fit: cover; }
     
-    /* TUO OVERLAY ORIGINALE CALIBRATO (40% altezza, 96% larghezza) */
+    /* OVERLAY CALIBRATO SUL TREPPIEDE (40% altezza, 96% larghezza) */
     #overlay-box { 
       position: absolute; 
       border: 2px dashed rgba(255,255,255,0.7); 
@@ -80,14 +80,14 @@
     const SYSTEM_PROMPT = `Sei un coach GTO infallibile di Spin & Go PokerStars (target: 75-80 ChipEV/t).
 L'immagine è un ritaglio del tavolo PokerStars Aurora con valori espressi DIRETTAMENTE IN "BB".
 
-DECODIFICA CRITICA DEI COLORI DEI SEMI (MAZZO 4 COLORI POKERSTARS):
+DECODIFICA CRITICA DEI COLORI DEI SEMI (MAZZO A 4 COLORI POKERSTARS):
 - QUADRI (d): È SEMPRE BLU / CELESTE ACCESO (rombo). Se il seme è blu o azzurro, È TASSATIVAMENTE QUADRI (d).
 - FIORI (c): È SEMPRE VERDE SMERALDO VIVO (trifoglio). Se il seme è verde, È TASSATIVAMENTE FIORI (c).
 - PICCHE (s): È NERO/GRIGIO SCURO (foglia con gambo).
 - CUORI (h): È ROSSO VIVO (cuore).
-ATTENZIONE: Non confondere Fiori (verde) con Picche (nero). Verifica sempre il colore del simbolo.
+ATTENZIONE: Non confondere MAI Fiori (verde) con Picche (nero). Verifica con rigore il colore del simbolo.
 
-DEDUZIONE DELLE POSIZIONI:
+DEDUZIONE DELLE POSIZIONI E AZIONI AL TAVOLO:
 1. DETERMINAZIONE NUMERO GIOCATORI:
    - Conta gli avatar con NOME e STACK visibili. Se un posto è completamente vuoto/spento, il giocatore è ELIMINATO -> HEADS-UP.
 2. LOGICA POSIZIONE IN HEADS-UP (2 giocatori rimasti):
@@ -98,9 +98,11 @@ DEDUZIONE DELLE POSIZIONI:
    - Hero ha '1 BB' a terra -> HERO È BB.
    - Hero ha '0.5 BB' a terra -> HERO È SB.
    - Hero ha '0 BB' a terra pre-flop prima di agire -> HERO È BTN.
-
 4. RICONOSCIMENTO TURNO DI HERO (BLUEY4):
    - Barra gialla timebank accesa sotto Bluey4.
+5. LETTURA AZIONI AVVERSARI (DATI PERMANENTI):
+   - Ignora scritte temporanee svanite ('Raise', 'Call', 'Bet').
+   - Affidati SOLO all'etichetta fissa 'All In' o alla cifra in BB della fiche a terra (es. 1 BB = limp, 2-3 BB = raise, >= 10 BB = all-in).
 
 REGOLE DECISIONALI COGENTI (POKERSTARS BB):
 1. CONTRO ALL-IN PRE-FLOP (>= 10 BB O ETICHETTA 'All In'):
@@ -190,7 +192,7 @@ RISPONDI ESCLUSIVAMENTE IN JSON VALIDO (senza backtick o markdown):
       if (!video.videoWidth) return;
 
       btnAction.disabled = true;
-      btnAction.innerText = "SCATTO RAW...";
+      btnAction.innerText = "SCATTO...";
       decisionEl.innerText = "ELABORAZIONE...";
       decisionEl.className = "";
 
@@ -198,13 +200,13 @@ RISPONDI ESCLUSIVAMENTE IN JSON VALIDO (senza backtick o markdown):
         const srcWidth = video.videoWidth;
         const srcHeight = video.videoHeight;
 
-        // TUO RITAGLIO ESATTO: 96% LARGHEZZA, 40% ALTEZZA
+        // GEOMETRIA CALIBRATA: 96% larghezza, 40% altezza
         const cropW = srcWidth * 0.96;
         const cropH = srcHeight * 0.40;
         const cropX = (srcWidth - cropW) / 2;
         const cropY = (srcHeight - cropH) / 2;
 
-        // Risoluzione a 1600px: nitidezza perfetta per numeri e semi, ma senza il peso di 2400px
+        // Risoluzione a 1600px per massima leggibilità
         const targetWidth = 1600;
         canvas.width = targetWidth;
         canvas.height = (cropH / cropW) * targetWidth;
@@ -215,7 +217,7 @@ RISPONDI ESCLUSIVAMENTE IN JSON VALIDO (senza backtick o markdown):
 
         ctx.drawImage(video, cropX, cropY, cropW, cropH, 0, 0, canvas.width, canvas.height);
 
-        // Compressione a 0.85 per massima leggibilità
+        // Compressione bilanciata a 0.85
         const base64Image = canvas.toDataURL('image/jpeg', 0.85).split(',')[1];
 
         btnAction.innerText = "ANALISI AI...";
@@ -224,7 +226,9 @@ RISPONDI ESCLUSIVAMENTE IN JSON VALIDO (senza backtick o markdown):
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({
-            system_instruction: { parts: [{ text: SYSTEM_PROMPT }] },
+            system_instruction: { 
+              parts: [{ text: SYSTEM_PROMPT }] 
+            },
             contents: [{
               role: "user",
               parts: [
