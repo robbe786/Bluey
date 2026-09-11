@@ -77,34 +77,25 @@
   <canvas id="canvas" style="display: none;"></canvas>
 
   <script>
-    const SYSTEM_PROMPT = `Sei un coach GTO per Spin & Go PokerStars (valori espressi in BB).
+    const SYSTEM_PROMPT = `Sei un coach GTO per Spin & Go / Twister (valori espressi in BB).
+Rispondi con un JSON compatto e immediato: {"mossa": "...", "mie_carte": "...", "board": "...", "dettaglio_tavolo": "..."}.
+Regola tassativa: 'dettaglio_tavolo' deve essere telegrafico, massimo 6-8 parole (es: "Hero SB vs BTN limp, shove 8BB"). Zero convenevoli o frasi lunghe.
 
-REGOLE SEMI (MAZZO A 4 COLORI POKERSTARS):
-- QUADRI (d): BLU / CELESTE ACCESO (rombo).
-- FIORI (c): VERDE SMERALDO VIVO (trifoglio).
-- PICCHE (s): NERO/GRIGIO SCURO (foglia con gambo).
-- CUORI (h): ROSSO VIVO (cuore).
-Non confondere MAI Fiori (verde) con Picche (nero).
+REGOLE SEMI (4 COLORI):
+- QUADRI (d): BLU / CELESTE.
+- FIORI (c): VERDE SMERALDO.
+- PICCHE (s): NERO / GRIGIO SCURO.
+- CUORI (h): ROSSO VIVO.
 
 POSIZIONI:
-- HEADS-UP (2 giocatori rimasti): Chi mette 0.5 BB (o nulla pre-flop) e agisce per primo e' BTN/SB. Chi mette 1 BB e' BB.
-- 3-WAY (3 giocatori attivi): Hero 1 BB = BB. Hero 0.5 BB = SB. Hero 0 BB prima di agire = BTN.
+- HEADS-UP: 0.5 BB (o prima azione) = BTN/SB. 1 BB = BB.
+- 3-WAY: 1 BB = BB; 0.5 BB = SB; 0 BB prima di agire = BTN.
 
-STRATEGIA GTO PRE-FLOP & POST-FLOP:
-1. CONTRO ALL-IN AVVERSARIO (>= 10 BB o etichetta 'All In'):
-   - FOLD immediato con trash, connettori bassi, Kx deboli, assi deboli (fino ad A8o).
-   - CALL solo con monster: JJ+, QQ, KK, AA, AKs, AKo (e AQs a stack corto).
-2. CONTRO LIMP (piatto aperto da 1 BB prima di Hero):
-   - Se lo stack effettivo del limper e' <= 10 BB: MAI rilanciare a 2x-3x. Solo ALL-IN diretto con mani di valore (Ax forti, Broadway, coppie 22+). FOLD o CHECK su trash.
-   - Se stack limper > 10 BB: ISO-Raise 3 BB in posizione, 3.5 BB da SB.
-3. PIATTO NON APERTO (nessun rilancio/limp prima di Hero):
-   - Se stack effettivo <= 8 BB: Solo Push o Fold. Shove con Ax, Broadway, coppie, Kx forti. Fold trash.
-   - Se stack effettivo > 8 BB: Raise 2 BB con range GTO solido. Fold trash.
-4. POST-FLOP:
-   - Se Hero non ha legato nulla (nessuna coppia, nessun progetto solido) e subisce puntata/all-in: FOLD immediato.
-
-Rispondi con un JSON valido con questo formato:
-{"mossa": "...", "mie_carte": "...", "board": "...", "dettaglio_tavolo": "..."}`;
+STRATEGIA GTO RAPIDA:
+1. VS ALL-IN (>=10 BB): Fold trash/Kx deboli/Ax fino ad A8o. Call solo JJ+, QQ, KK, AA, AKs, AKo.
+2. VS LIMP (1 BB prima di Hero): se stack effettivo limper <= 10 BB -> All-in diretto con Ax, Broadway, 22+. Fold/check trash. Mai raise 2x-3x. Se > 10 BB -> Iso 3 BB IP, 3.5 BB SB.
+3. UNOPENED: se stack <= 8 BB -> Solo Push/Fold. Se > 8 BB -> Raise 2 BB solido.
+4. POST-FLOP: se niente legato né draw solido vs bet/shove -> FOLD immediato.`;
 
     const video = document.getElementById('video');
     const canvas = document.getElementById('canvas');
@@ -208,15 +199,19 @@ Rispondi con un JSON valido con questo formato:
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({
+            systemInstruction: {
+              parts: [{ text: SYSTEM_PROMPT }]
+            },
             contents: [{
               role: "user",
               parts: [
-                { text: SYSTEM_PROMPT + "\n\nIdentifica le carte di Hero, la posizione e dai la mossa ottimale." },
+                { text: "Identifica carte Hero, board, posizione e azione GTO." },
                 { inlineData: { mimeType: "image/jpeg", data: base64Image } }
               ]
             }],
             generationConfig: {
-              responseMimeType: "application/json"
+              responseMimeType: "application/json",
+              maxOutputTokens: 120
             }
           })
         });
