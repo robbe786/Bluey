@@ -192,8 +192,8 @@ Rispondi SOLO con un JSON valido con questo formato:
         const cropX = (srcWidth - cropW) / 2;
         const cropY = (srcHeight - cropH) / 2;
 
-        // OTTIMIZZAZIONE 960px
-        const targetWidth = 960;
+        // RIPRISTINATO A 1280px PER MASSIMA NITIDEZZA DEI SEMI E DEGLI AVATAR
+        const targetWidth = 1280;
         canvas.width = targetWidth;
         canvas.height = Math.round((cropH / cropW) * targetWidth);
 
@@ -203,8 +203,8 @@ Rispondi SOLO con un JSON valido con questo formato:
 
         ctx.drawImage(video, cropX, cropY, cropW, cropH, 0, 0, canvas.width, canvas.height);
 
-        // Compressione a 0.65
-        const base64Image = canvas.toDataURL('image/jpeg', 0.65).split(',')[1];
+        // RIPRISTINATO A 0.75: ZERO ARTEFATTI VISIVI
+        const base64Image = canvas.toDataURL('image/jpeg', 0.75).split(',')[1];
 
         btnAction.innerText = "ANALISI AI...";
 
