@@ -190,7 +190,7 @@ Rispondi con un JSON valido con questo formato:
         const cropX = (srcWidth - cropW) / 2;
         const cropY = (srcHeight - cropH) / 2;
 
-        const targetWidth = 1600;
+        const targetWidth = 1280;
         canvas.width = targetWidth;
         canvas.height = (cropH / cropW) * targetWidth;
 
@@ -200,7 +200,7 @@ Rispondi con un JSON valido con questo formato:
 
         ctx.drawImage(video, cropX, cropY, cropW, cropH, 0, 0, canvas.width, canvas.height);
 
-        const base64Image = canvas.toDataURL('image/jpeg', 0.85).split(',')[1];
+        const base64Image = canvas.toDataURL('image/jpeg', 0.75).split(',')[1];
 
         btnAction.innerText = "ANALISI AI...";
 
