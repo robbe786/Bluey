@@ -77,9 +77,9 @@
   <canvas id="canvas" style="display: none;"></canvas>
 
   <script>
-    const SYSTEM_PROMPT = `Sei un coach GTO per Spin & Go PokerStars (valori espressi in BB).
+    const SYSTEM_PROMPT = `Sei un coach GTO per Spin & Go / Twister Sisal (valori espressi in BB).
 
-REGOLE SEMI (MAZZO A 4 COLORI POKERSTARS):
+REGOLE SEMI (MAZZO A 4 COLORI):
 - QUADRI (d): BLU / CELESTE ACCESO (rombo).
 - FIORI (c): VERDE SMERALDO VIVO (trifoglio).
 - PICCHE (s): NERO/GRIGIO SCURO (foglia con gambo).
@@ -87,23 +87,25 @@ REGOLE SEMI (MAZZO A 4 COLORI POKERSTARS):
 Non confondere MAI Fiori (verde) con Picche (nero).
 
 POSIZIONI:
-- HEADS-UP (2 giocatori rimasti): Chi mette 0.5 BB (o nulla pre-flop) e agisce per primo e' BTN/SB. Chi mette 1 BB e' BB.
+- HEADS-UP (2 giocatori rimasti): Chi mette 0.5 BB (o prima azione) e' BTN/SB. Chi mette 1 BB e' BB.
 - 3-WAY (3 giocatori attivi): Hero 1 BB = BB. Hero 0.5 BB = SB. Hero 0 BB prima di agire = BTN.
 
-STRATEGIA GTO PRE-FLOP & POST-FLOP:
-1. CONTRO ALL-IN AVVERSARIO (>= 10 BB o etichetta 'All In'):
-   - FOLD immediato con trash, connettori bassi, Kx deboli, assi deboli (fino ad A8o).
-   - CALL solo con monster: JJ+, QQ, KK, AA, AKs, AKo (e AQs a stack corto).
+STRATEGIA GTO PRE-FLOP:
+1. CONTRO ALL-IN AVVERSARIO (valuta SEMPRE lo STACK EFFETTIVO di chi shova):
+   - SE ALL-IN <= 4 BB: CALL larghissimo per pot odds. CALL con qualsiasi Asso (Ax), qualsiasi Kx, Qx decenti (Q5+), connettori medi/alti (J8+, T8+, 98s, T9), tutte le coppie (22+). FOLD solo spazzatura disconnessa totale (es: 72o, 83o, 42o).
+   - SE ALL-IN 5 - 9 BB: CALL con tutte le coppie (22+), A2s+, A7o+, Broadway forti (KTs+, KJo+, QJs). FOLD il resto.
+   - SE ALL-IN >= 10 BB: CALL solo con monster assolute: JJ+, QQ, KK, AA, AKs, AKo (e AQs a 10-12 BB). FOLD tutto il resto.
 2. CONTRO LIMP (piatto aperto da 1 BB prima di Hero):
-   - Se lo stack effettivo del limper e' <= 10 BB: MAI rilanciare a 2x-3x. Solo ALL-IN diretto con mani di valore (Ax forti, Broadway, coppie 22+). FOLD o CHECK su trash.
+   - Se lo stack effettivo del limper e' <= 10 BB: MAI rilanciare a 2x-3x. Solo ALL-IN diretto con valore (Ax forti, Broadway, coppie 22+). FOLD o CHECK su trash.
    - Se stack limper > 10 BB: ISO-Raise 3 BB in posizione, 3.5 BB da SB.
 3. PIATTO NON APERTO (nessun rilancio/limp prima di Hero):
    - Se stack effettivo <= 8 BB: Solo Push o Fold. Shove con Ax, Broadway, coppie, Kx forti. Fold trash.
    - Se stack effettivo > 8 BB: Raise 2 BB con range GTO solido. Fold trash.
-4. POST-FLOP:
-   - Se Hero non ha legato nulla (nessuna coppia, nessun progetto solido) e subisce puntata/all-in: FOLD immediato.
 
-Rispondi con un JSON valido con questo formato:
+STRATEGIA POST-FLOP:
+- Se Hero non ha legato nulla (nessuna coppia, nessun progetto solido a 8+ out) e subisce puntata/all-in: FOLD immediato.
+
+Rispondi SOLO con un JSON valido con questo formato:
 {"mossa": "...", "mie_carte": "...", "board": "...", "dettaglio_tavolo": "..."}`;
 
     const video = document.getElementById('video');
@@ -190,6 +192,7 @@ Rispondi con un JSON valido con questo formato:
         const cropX = (srcWidth - cropW) / 2;
         const cropY = (srcHeight - cropH) / 2;
 
+        // OTTIMIZZAZIONE 960px
         const targetWidth = 960;
         canvas.width = targetWidth;
         canvas.height = Math.round((cropH / cropW) * targetWidth);
@@ -200,6 +203,7 @@ Rispondi con un JSON valido con questo formato:
 
         ctx.drawImage(video, cropX, cropY, cropW, cropH, 0, 0, canvas.width, canvas.height);
 
+        // Compressione a 0.65
         const base64Image = canvas.toDataURL('image/jpeg', 0.65).split(',')[1];
 
         btnAction.innerText = "ANALISI AI...";
@@ -237,7 +241,7 @@ Rispondi con un JSON valido con questo formato:
 
         let rawText = candidate.content.parts[0].text.trim();
 
-        // Estrazione precisa del blocco JSON tra { e }
+        // Estrazione sicura del blocco { ... }
         const start = rawText.indexOf('{');
         const end = rawText.lastIndexOf('}');
         
