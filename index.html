@@ -1,17 +1,3 @@
-L'errore "JSON non valido" persistente si verifica per due motivi precisi legati alle API REST di Gemini:
-
-1. **Il formato di `responseSchema`:** nell'API REST v1beta, i tipi dello schema devono essere in minuscolo (`string`, `object`) e non in maiuscolo. Scrivendo `"STRING"` o `"OBJECT"` l'endpoint a volte rifiuta o ignora lo schema strutturato, sputando testo libero, markdown (`json ... `) o un errore.
-2. **Markdown backticks e caratteri di a-capo non escapati:** anche con `responseMimeType: "application/json"`, Gemini a volte incapsula il JSON dentro `json ... `, oppure inserisce caratteri speciali nel testo. Se il parser fa `JSON.parse()` diretto su una stringa sporca, fallisce.
-
-Inoltre, per evitare blocchi a vuoto, mostriamo a schermo **esattamente cosa ha risposto il server** nel box dettagli, così se qualcosa non va leggiamo subito l'errore effettivo.
-
-Ecco il codice completo corretto con:
-
-* `responseSchema` conforme alle specifiche REST (tipi corretti: `string`, `object`).
-* Sanitizzazione automatica e pulizia di eventuali blocchi markdown (```json).
-* Debug a schermo in caso di fallimento del parse.
-
-```html
 <!DOCTYPE html>
 <html lang="it">
 <head>
@@ -320,5 +306,3 @@ STRATEGIA GTO RAPIDA:
   </script>
 </body>
 </html>
-
-```
