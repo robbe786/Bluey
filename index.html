@@ -92,18 +92,23 @@ POSIZIONI:
 
 STRATEGIA GTO PRE-FLOP:
 1. CONTRO ALL-IN AVVERSARIO (valuta SEMPRE lo STACK EFFETTIVO di chi shova):
-   - SE ALL-IN <= 4 BB: CALL larghissimo per pot odds. CALL con qualsiasi Asso (Ax), qualsiasi Kx, Qx decenti (Q5+), connettori medi/alti (J8+, T8+, 98s, T9), tutte le coppie (22+). FOLD solo spazzatura disconnessa totale (es: 72o, 83o, 42o).
+   - SE ALL-IN <= 4 BB: CALL larghissimo per pot odds. CALL con qualsiasi Asso (Ax), qualsiasi Kx, Qx decenti (Q5+), connettori medi/alti (J8+, T8+, 98s, T9), tutte le coppie (22+). FOLD solo trash totale (72o, 83o, 42o).
    - SE ALL-IN 5 - 9 BB: CALL con tutte le coppie (22+), A2s+, A7o+, Broadway forti (KTs+, KJo+, QJs). FOLD il resto.
-   - SE ALL-IN >= 10 BB: CALL solo con monster assolute: JJ+, QQ, KK, AA, AKs, AKo (e AQs a 10-12 BB). FOLD tutto il resto.
+   - SE ALL-IN >= 10 BB: CALL solo con monster: JJ+, QQ, KK, AA, AKs, AKo (e AQs a 10-12 BB). FOLD il resto.
 2. CONTRO LIMP (piatto aperto da 1 BB prima di Hero):
-   - Se lo stack effettivo del limper e' <= 10 BB: MAI rilanciare a 2x-3x. Solo ALL-IN diretto con valore (Ax forti, Broadway, coppie 22+). FOLD o CHECK su trash.
+   - Se stack effettivo limper <= 10 BB: MAI rilanciare a 2x-3x. Solo ALL-IN diretto con valore (Ax forti, Broadway, coppie 22+). FOLD o CHECK su trash.
    - Se stack limper > 10 BB: ISO-Raise 3 BB in posizione, 3.5 BB da SB.
 3. PIATTO NON APERTO (nessun rilancio/limp prima di Hero):
    - Se stack effettivo <= 8 BB: Solo Push o Fold. Shove con Ax, Broadway, coppie, Kx forti. Fold trash.
    - Se stack effettivo > 8 BB: Raise 2 BB con range GTO solido. Fold trash.
 
-STRATEGIA POST-FLOP:
-- Se Hero non ha legato nulla (nessuna coppia, nessun progetto solido a 8+ out) e subisce puntata/all-in: FOLD immediato.
+STRATEGIA POST-FLOP (RIGIDA):
+1. CONTRO PUNTATA AVVERSARIA:
+   - Se bet >= pot (overbet o grossa puntata): FOLD immediato con tutti i progetti semplici (scala bilaterale, incastro, colore). CALL o RAISE solo con Top Pair forte (buon kicker), doppia coppia, set o punto già completato.
+   - A stack corto (<= 8 BB residui): MAI fare CALL passivo con soli draw se la puntata impegna piu' del 30% del tuo stack rimanente. O è ALL-IN diretto (se monster draw 12+ out), altrimenti FOLD secco.
+   - Se Hero ha aria totale (nessuna coppia e nessun progetto solido): FOLD immediato su qualsiasi bet.
+2. TURN E RIVER:
+   - Se la carta al Turn/River non migliora Hero e si ha solo carta alta: CHECK/FOLD. MAI andare all-in in donk-bet senza punto fatto o draw nuts.
 
 Rispondi SOLO con un JSON valido con questo formato:
 {"mossa": "...", "mie_carte": "...", "board": "...", "dettaglio_tavolo": "..."}`;
@@ -192,7 +197,6 @@ Rispondi SOLO con un JSON valido con questo formato:
         const cropX = (srcWidth - cropW) / 2;
         const cropY = (srcHeight - cropH) / 2;
 
-        // RIPRISTINATO A 1280px PER MASSIMA NITIDEZZA DEI SEMI E DEGLI AVATAR
         const targetWidth = 1280;
         canvas.width = targetWidth;
         canvas.height = Math.round((cropH / cropW) * targetWidth);
@@ -203,7 +207,6 @@ Rispondi SOLO con un JSON valido con questo formato:
 
         ctx.drawImage(video, cropX, cropY, cropW, cropH, 0, 0, canvas.width, canvas.height);
 
-        // RIPRISTINATO A 0.75: ZERO ARTEFATTI VISIVI
         const base64Image = canvas.toDataURL('image/jpeg', 0.75).split(',')[1];
 
         btnAction.innerText = "ANALISI AI...";
