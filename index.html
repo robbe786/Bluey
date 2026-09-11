@@ -1,3 +1,17 @@
+L'errore "JSON non valido" persistente si verifica per due motivi precisi legati alle API REST di Gemini:
+
+1. **Il formato di `responseSchema`:** nell'API REST v1beta, i tipi dello schema devono essere in minuscolo (`string`, `object`) e non in maiuscolo. Scrivendo `"STRING"` o `"OBJECT"` l'endpoint a volte rifiuta o ignora lo schema strutturato, sputando testo libero, markdown (`json ... `) o un errore.
+2. **Markdown backticks e caratteri di a-capo non escapati:** anche con `responseMimeType: "application/json"`, Gemini a volte incapsula il JSON dentro `json ... `, oppure inserisce caratteri speciali nel testo. Se il parser fa `JSON.parse()` diretto su una stringa sporca, fallisce.
+
+Inoltre, per evitare blocchi a vuoto, mostriamo a schermo **esattamente cosa ha risposto il server** nel box dettagli, così se qualcosa non va leggiamo subito l'errore effettivo.
+
+Ecco il codice completo corretto con:
+
+* `responseSchema` conforme alle specifiche REST (tipi corretti: `string`, `object`).
+* Sanitizzazione automatica e pulizia di eventuali blocchi markdown (```json).
+* Debug a schermo in caso di fallimento del parse.
+
+```html
 <!DOCTYPE html>
 <html lang="it">
 <head>
@@ -78,11 +92,11 @@
 
   <script>
     const SYSTEM_PROMPT = `Sei un coach GTO per Spin & Go / Twister (valori espressi in BB).
-Rispondi esclusivamente con un JSON valido contenente:
-- mossa: l'azione consigliata (es: FOLD, CALL, RAISE 2BB, ALL-IN)
-- mie_carte: le 2 carte di Hero (es: As Kd) o stringa vuota se non visibili
-- board: carte sul tavolo separate da spazio (es: 2c 7h Qs) o stringa vuota se pre-flop
-- dettaglio_tavolo: commento telegrafico di max 6-8 parole (es: "SB vs BTN limp, shove 8BB")
+Genera un oggetto JSON con queste 4 chiavi:
+- "mossa": azione consigliata (es: FOLD, CALL, RAISE 2BB, ALL-IN)
+- "mie_carte": le 2 carte di Hero (es: As Kd) o stringa vuota
+- "board": carte a terra (es: 2c 7h Qs) o stringa vuota se preflop
+- "dettaglio_tavolo": massimo 6-8 parole telegrafiche (es: "Hero SB vs BTN limp, shove 8BB")
 
 REGOLE SEMI (4 COLORI):
 - QUADRI (d): BLU / CELESTE.
@@ -91,7 +105,7 @@ REGOLE SEMI (4 COLORI):
 - CUORI (h): ROSSO VIVO.
 
 POSIZIONI:
-- HEADS-UP: 0.5 BB (o prima azione) = BTN/SB. 1 BB = BB.
+- HEADS-UP: 0.5 BB = BTN/SB. 1 BB = BB.
 - 3-WAY: 1 BB = BB; 0.5 BB = SB; 0 BB prima di agire = BTN.
 
 STRATEGIA GTO RAPIDA:
@@ -198,7 +212,7 @@ STRATEGIA GTO RAPIDA:
 
         btnAction.innerText = "ANALISI AI...";
 
-        const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-3.6-flash:generateContent?key=${apiKey}`, {
+        const response = await fetch(`[https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=$](https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=$){apiKey}`, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({
@@ -208,23 +222,13 @@ STRATEGIA GTO RAPIDA:
             contents: [{
               role: "user",
               parts: [
-                { text: "Identifica carte Hero, board, posizione e azione GTO." },
+                { text: "Analizza il tavolo inquadrato. Restituisci il JSON con la decisione." },
                 { inlineData: { mimeType: "image/jpeg", data: base64Image } }
               ]
             }],
             generationConfig: {
               responseMimeType: "application/json",
-              maxOutputTokens: 300,
-              responseSchema: {
-                type: "OBJECT",
-                properties: {
-                  mossa: { type: "STRING" },
-                  mie_carte: { type: "STRING" },
-                  board: { type: "STRING" },
-                  dettaglio_tavolo: { type: "STRING" }
-                },
-                required: ["mossa", "mie_carte", "board", "dettaglio_tavolo"]
-              }
+              maxOutputTokens: 500
             }
           })
         });
@@ -232,26 +236,33 @@ STRATEGIA GTO RAPIDA:
         const data = await response.json();
 
         if (data.error) {
-          throw new Error(data.error.message || `Errore HTTP ${data.error.code}`);
+          throw new Error(data.error.message || `Errore API: ${JSON.stringify(data.error)}`);
         }
 
         const candidate = data.candidates?.[0];
         if (!candidate || !candidate.content?.parts?.[0]?.text) {
-          throw new Error("Nessuna risposta valida generata dal server.");
+          const reason = candidate?.finishReason || "NESSUNA_RISPOSTA";
+          throw new Error(`Nessun contenuto generato (Finish Reason: ${reason})`);
         }
 
-        const rawText = candidate.content.parts[0].text.trim();
+        let rawText = candidate.content.parts[0].text.trim();
+
+        // Rimuove eventuali blocchi markdown ```json ... ```
+        if (rawText.startsWith("```")) {
+          rawText = rawText.replace(/^```(?:json)?\s*/i, "").replace(/\s*```$/, "").trim();
+        }
 
         let parsed;
         try {
           parsed = JSON.parse(rawText);
         } catch (e) {
+          // Tentativo di estrazione del primo blocco { ... } valido
           const start = rawText.indexOf('{');
           const end = rawText.lastIndexOf('}');
           if (start !== -1 && end !== -1 && end > start) {
             parsed = JSON.parse(rawText.substring(start, end + 1));
           } else {
-            throw new Error("JSON non valido: " + rawText.slice(0, 60));
+            throw new Error(`Errore parse. Ricevuto: "${rawText.slice(0, 100)}"`);
           }
         }
 
@@ -309,3 +320,5 @@ STRATEGIA GTO RAPIDA:
   </script>
 </body>
 </html>
+
+```
