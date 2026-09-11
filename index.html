@@ -78,8 +78,11 @@
 
   <script>
     const SYSTEM_PROMPT = `Sei un coach GTO per Spin & Go / Twister (valori espressi in BB).
-Rispondi con un JSON compatto e immediato: {"mossa": "...", "mie_carte": "...", "board": "...", "dettaglio_tavolo": "..."}.
-Regola tassativa: 'dettaglio_tavolo' deve essere telegrafico, massimo 6-8 parole (es: "Hero SB vs BTN limp, shove 8BB"). Zero convenevoli o frasi lunghe.
+Rispondi esclusivamente con un JSON valido contenente:
+- mossa: l'azione consigliata (es: FOLD, CALL, RAISE 2BB, ALL-IN)
+- mie_carte: le 2 carte di Hero (es: As Kd) o stringa vuota se non visibili
+- board: carte sul tavolo separate da spazio (es: 2c 7h Qs) o stringa vuota se pre-flop
+- dettaglio_tavolo: commento telegrafico di max 6-8 parole (es: "SB vs BTN limp, shove 8BB")
 
 REGOLE SEMI (4 COLORI):
 - QUADRI (d): BLU / CELESTE.
@@ -211,7 +214,17 @@ STRATEGIA GTO RAPIDA:
             }],
             generationConfig: {
               responseMimeType: "application/json",
-              maxOutputTokens: 120
+              maxOutputTokens: 300,
+              responseSchema: {
+                type: "OBJECT",
+                properties: {
+                  mossa: { type: "STRING" },
+                  mie_carte: { type: "STRING" },
+                  board: { type: "STRING" },
+                  dettaglio_tavolo: { type: "STRING" }
+                },
+                required: ["mossa", "mie_carte", "board", "dettaglio_tavolo"]
+              }
             }
           })
         });
@@ -238,7 +251,7 @@ STRATEGIA GTO RAPIDA:
           if (start !== -1 && end !== -1 && end > start) {
             parsed = JSON.parse(rawText.substring(start, end + 1));
           } else {
-            throw new Error("JSON non valido: " + rawText.slice(0, 40));
+            throw new Error("JSON non valido: " + rawText.slice(0, 60));
           }
         }
 
