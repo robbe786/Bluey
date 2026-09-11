@@ -1,306 +1,606 @@
 <!DOCTYPE html>
+
 <html lang="it">
+
 <head>
+
   <meta charset="UTF-8">
+
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+
   <title>Poker Assistant 360°</title>
+
   <style>
+
     * { box-sizing: border-box; margin: 0; padding: 0; font-family: system-ui, -apple-system, sans-serif; }
+
     body { background-color: #121212; color: #fff; height: 100vh; height: 100dvh; display: flex; flex-direction: column; overflow: hidden; }
+
     #camera-container { flex: 1 1 auto; min-height: 0; position: relative; background: #000; overflow: hidden; display: flex; justify-content: center; align-items: center; }
+
     video { width: 100%; height: 100%; object-fit: cover; }
 
+
+
     /* OVERLAY CALIBRATO SUL TREPPIEDE (40% altezza, 96% larghezza) */
+
     #overlay-box { 
+
       position: absolute; 
+
       border: 2px dashed rgba(255,255,255,0.7); 
+
       width: 96%; 
+
       height: 40%; 
+
       pointer-events: none; 
+
       border-radius: 8px; 
+
       box-shadow: 0 0 0 9999px rgba(0,0,0,0.6); 
+
     }
+
+
 
     #result-panel { flex: 0 0 auto; background: #1a1a1a; padding: 12px 16px 20px 16px; display: flex; flex-direction: column; align-items: center; gap: 10px; border-top: 2px solid #333; }
+
     #decision { font-size: 1.8rem; font-weight: 900; text-align: center; letter-spacing: 1px; color: #888; }
+
     #details { font-size: 0.9rem; color: #ccc; width: 100%; text-align: left; line-height: 1.45; min-height: 2.8em; word-break: break-word; }
+
     #btn-action { width: 100%; padding: 16px; font-size: 1.2rem; font-weight: bold; color: white; background: #2563eb; border: none; border-radius: 12px; cursor: pointer; touch-action: manipulation; }
+
     #btn-action:active { background: #1d4ed8; }
+
     #btn-action:disabled { background: #444; color: #888; cursor: not-allowed; }
 
+
+
     .poker-card {
+
       display: inline-block;
+
       font-weight: 800;
+
       padding: 1px 6px;
+
       margin: 0 2px;
+
       border-radius: 4px;
+
       background: #262626;
+
       border: 1px solid #404040;
+
       letter-spacing: 0.5px;
+
     }
+
     .card-d { color: #38bdf8 !important; }
+
     .card-c { color: #22c55e !important; }
+
     .card-h { color: #ef4444 !important; }
+
     .card-s { color: #f8fafc !important; }
 
+
+
     .status-raise { color: #3b82f6 !important; }
+
     .status-call { color: #10b981 !important; }
+
     .status-fold { color: #ef4444 !important; }
 
+
+
     #api-modal { position: fixed; inset: 0; background: rgba(0,0,0,0.92); display: flex; justify-content: center; align-items: center; padding: 20px; z-index: 100; }
+
     .modal-content { background: #222; padding: 20px; border-radius: 12px; width: 100%; max-width: 350px; border: 1px solid #333; }
+
     .modal-content input { width: 100%; padding: 12px; margin: 12px 0; border-radius: 6px; border: 1px solid #444; background: #111; color: white; font-size: 0.95rem; }
+
     .modal-content button { width: 100%; padding: 12px; background: #2563eb; border: none; border-radius: 6px; color: white; font-weight: bold; font-size: 1rem; }
+
   </style>
+
 </head>
+
 <body>
 
+
+
   <div id="api-modal">
+
     <div class="modal-content">
+
       <h3 style="font-size: 1.1rem;">Inserisci Gemini API Key</h3>
+
       <input type="text" id="api-key-input" placeholder="Incolla chiave AQ...">
+
       <button id="save-key-btn">Salva e Avvia</button>
+
     </div>
+
   </div>
+
+
 
   <div id="camera-container">
+
     <video id="video" autoplay playsinline muted></video>
+
     <div id="overlay-box"></div>
+
   </div>
 
+
+
   <div id="result-panel">
+
     <div id="decision">IN ATTESA</div>
+
     <div id="details">Inquadra il tavolo nel riquadro panoramico.</div>
+
     <button id="btn-action">SCATTA E DECIDI</button>
+
   </div>
+
+
 
   <canvas id="canvas" style="display: none;"></canvas>
 
+
+
   <script>
+
     const SYSTEM_PROMPT = `Sei un coach GTO per Spin & Go PokerStars (valori espressi in BB).
 
+
+
 REGOLE SEMI (MAZZO A 4 COLORI POKERSTARS):
+
 - QUADRI (d): BLU / CELESTE ACCESO (rombo).
+
 - FIORI (c): VERDE SMERALDO VIVO (trifoglio).
+
 - PICCHE (s): NERO/GRIGIO SCURO (foglia con gambo).
+
 - CUORI (h): ROSSO VIVO (cuore).
+
 Non confondere MAI Fiori (verde) con Picche (nero).
 
+
+
 POSIZIONI:
+
 - HEADS-UP (2 giocatori rimasti): Chi mette 0.5 BB (o nulla pre-flop) e agisce per primo e' BTN/SB. Chi mette 1 BB e' BB.
+
 - 3-WAY (3 giocatori attivi): Hero 1 BB = BB. Hero 0.5 BB = SB. Hero 0 BB prima di agire = BTN.
 
+
+
 STRATEGIA GTO PRE-FLOP & POST-FLOP:
+
 1. CONTRO ALL-IN AVVERSARIO (>= 10 BB o etichetta 'All In'):
+
    - FOLD immediato con trash, connettori bassi, Kx deboli, assi deboli (fino ad A8o).
+
    - CALL solo con monster: JJ+, QQ, KK, AA, AKs, AKo (e AQs a stack corto).
+
 2. CONTRO LIMP (piatto aperto da 1 BB prima di Hero):
+
    - Se lo stack effettivo del limper e' <= 10 BB: MAI rilanciare a 2x-3x. Solo ALL-IN diretto con mani di valore (Ax forti, Broadway, coppie 22+). FOLD o CHECK su trash.
+
    - Se stack limper > 10 BB: ISO-Raise 3 BB in posizione, 3.5 BB da SB.
+
 3. PIATTO NON APERTO (nessun rilancio/limp prima di Hero):
+
    - Se stack effettivo <= 8 BB: Solo Push o Fold. Shove con Ax, Broadway, coppie, Kx forti. Fold trash.
+
    - Se stack effettivo > 8 BB: Raise 2 BB con range GTO solido. Fold trash.
+
 4. POST-FLOP:
+
    - Se Hero non ha legato nulla (nessuna coppia, nessun progetto solido) e subisce puntata/all-in: FOLD immediato.
 
+
+
 Rispondi con un JSON valido con questo formato:
+
 {"mossa": "...", "mie_carte": "...", "board": "...", "dettaglio_tavolo": "..."}`;
 
+
+
     const video = document.getElementById('video');
+
     const canvas = document.getElementById('canvas');
+
     const btnAction = document.getElementById('btn-action');
+
     const decisionEl = document.getElementById('decision');
+
     const detailsEl = document.getElementById('details');
+
     const apiModal = document.getElementById('api-modal');
+
     const apiKeyInput = document.getElementById('api-key-input');
+
     const saveKeyBtn = document.getElementById('save-key-btn');
+
+
 
     let apiKey = localStorage.getItem('GEMINI_API_KEY') || '';
 
+
+
     if (apiKey) {
+
       apiModal.style.display = 'none';
+
       startCamera();
+
     }
+
+
 
     saveKeyBtn.onclick = () => {
+
       apiKey = apiKeyInput.value.trim();
+
       if (apiKey) {
+
         localStorage.setItem('GEMINI_API_KEY', apiKey);
+
         apiModal.style.display = 'none';
+
         startCamera();
+
       }
+
     };
 
+
+
     function formatPokerCards(cardString) {
+
       if (!cardString || typeof cardString !== 'string') return '';
+
       return cardString.replace(/\b([AKQJT0-9]{1,2})([shdc])\b/gi, (match, val, suit) => {
+
         const s = suit.toLowerCase();
+
         let suitSymbol = s;
+
         if (s === 'd') suitSymbol = '♦';
+
         else if (s === 'c') suitSymbol = '♣';
+
         else if (s === 'h') suitSymbol = '♥';
+
         else if (s === 's') suitSymbol = '♠';
+
         return `<span class="poker-card card-${s}">${val.toUpperCase()}${suitSymbol}</span>`;
+
       });
+
     }
+
+
 
     async function startCamera() {
+
       try {
+
         const stream = await navigator.mediaDevices.getUserMedia({
+
           video: { 
+
             facingMode: { ideal: 'environment' },
+
             width: { ideal: 1920, min: 1280 },
+
             height: { ideal: 1080, min: 720 },
+
             advanced: [
+
               { focusMode: 'continuous' },
+
               { exposureMode: 'continuous' }
+
             ]
+
           },
+
           audio: false
+
         });
 
+
+
         video.srcObject = stream;
+
         video.setAttribute("playsinline", true);
+
         await video.play();
+
       } catch (err) {
+
         alert("Errore fotocamera: " + err.message);
+
       }
+
     }
 
+
+
     btnAction.onclick = async () => {
+
       if (!apiKey) {
+
         apiModal.style.display = 'flex';
+
         return;
+
       }
+
+
 
       if (!video.videoWidth) return;
 
+
+
       btnAction.disabled = true;
+
       btnAction.innerText = "SCATTO...";
+
       decisionEl.innerText = "ELABORAZIONE...";
+
       decisionEl.className = "";
 
+
+
       try {
+
         const srcWidth = video.videoWidth;
+
         const srcHeight = video.videoHeight;
 
+
+
         // GEOMETRIA FISSA DEL TREPPIEDE (40% altezza, 96% larghezza)
+
         const cropW = srcWidth * 0.96;
+
         const cropH = srcHeight * 0.40;
+
         const cropX = (srcWidth - cropW) / 2;
+
         const cropY = (srcHeight - cropH) / 2;
 
-        // OTTIMIZZAZIONE LATENZA: 960px mantiene i dettagli dei BB riducendo il payload del 60%
-        const targetWidth = 960;
+
+
+        const targetWidth = 1280;
+
         canvas.width = targetWidth;
-        canvas.height = Math.round((cropH / cropW) * targetWidth);
+
+        canvas.height = (cropH / cropW) * targetWidth;
+
+
 
         const ctx = canvas.getContext('2d');
+
         ctx.imageSmoothingEnabled = true;
+
         ctx.imageSmoothingQuality = 'high';
+
+
 
         ctx.drawImage(video, cropX, cropY, cropW, cropH, 0, 0, canvas.width, canvas.height);
 
-        // Qualità compressa a 0.65: dimezza il base64 senza artefatti sui colori dei semi
-        const base64Image = canvas.toDataURL('image/jpeg', 0.65).split(',')[1];
+
+
+        const base64Image = canvas.toDataURL('image/jpeg', 0.75).split(',')[1];
+
+
 
         btnAction.innerText = "ANALISI AI...";
 
+
+
         const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-3.6-flash:generateContent?key=${apiKey}`, {
+
           method: 'POST',
+
           headers: { 'Content-Type': 'application/json' },
+
           body: JSON.stringify({
+
             contents: [{
+
               role: "user",
+
               parts: [
+
                 { text: SYSTEM_PROMPT + "\n\nIdentifica le carte di Hero, la posizione e dai la mossa ottimale." },
+
                 { inlineData: { mimeType: "image/jpeg", data: base64Image } }
+
               ]
+
             }],
+
             generationConfig: {
-              responseMimeType: "application/json",
-              maxOutputTokens: 400
+
+              responseMimeType: "application/json"
+
             }
+
           })
+
         });
+
+
 
         const data = await response.json();
 
+
+
         if (data.error) {
+
           throw new Error(data.error.message || `Errore HTTP ${data.error.code}`);
+
         }
 
+
+
         const candidate = data.candidates?.[0];
+
         if (!candidate || !candidate.content?.parts?.[0]?.text) {
+
           throw new Error("Nessuna risposta valida generata dal server.");
+
         }
+
+
 
         const rawText = candidate.content.parts[0].text.trim();
 
+
+
         let parsed;
+
         try {
+
           parsed = JSON.parse(rawText);
+
         } catch (e) {
+
           const start = rawText.indexOf('{');
+
           const end = rawText.lastIndexOf('}');
+
           if (start !== -1 && end !== -1 && end > start) {
+
             parsed = JSON.parse(rawText.substring(start, end + 1));
+
           } else {
+
             throw new Error("JSON non valido: " + rawText.slice(0, 40));
+
           }
+
         }
+
+
 
         decisionEl.innerText = parsed.mossa || "INFO";
 
+
+
         const coloredHero = parsed.mie_carte ? formatPokerCards(parsed.mie_carte) : 'NON RILEVATE';
+
         const coloredBoard = parsed.board ? formatPokerCards(parsed.board) : '<span style="color:#666;">Nessuno (Pre-Flop)</span>';
 
+
+
         detailsEl.innerHTML = `
+
           • <b>HERO:</b> [ ${coloredHero} ]<br>
+
           • <b>BOARD:</b> [ ${coloredBoard} ]<br>
+
           • ${parsed.dettaglio_tavolo || ''}
+
         `;
 
+
+
         const action = (parsed.mossa || '').toUpperCase();
+
         if (action.includes("ALL-IN") || action.includes("RAISE") || action.includes("C-BET")) {
+
           decisionEl.className = "status-raise";
+
         } else if (action.includes("CHECK") || action.includes("CALL")) {
+
           decisionEl.className = "status-call";
+
         } else if (action.includes("FOLD")) {
+
           decisionEl.className = "status-fold";
+
         } else {
+
           decisionEl.className = "";
+
         }
 
+
+
       } catch (err) {
+
         decisionEl.innerText = "ERRORE";
+
         detailsEl.innerText = err.message;
+
       } finally {
+
         btnAction.disabled = false;
+
         btnAction.innerText = "SCATTA E DECIDI";
+
       }
+
     };
 
+
+
     window.addEventListener('keydown', (e) => {
+
       if (
+
         e.code === 'Space' || 
+
         e.code === 'Enter' || 
+
         e.key === 'Enter' || 
+
         e.key === ' ' || 
-        e.code.startsWith('Numpad') || 
+
+        e.code.startsWith('Numpad') ||
+
         e.key === 'VolumeUp' || 
+
         e.key === 'VolumeDown'
+
       ) {
+
         e.preventDefault();
+
         if (!btnAction.disabled) btnAction.click();
+
       }
+
     });
 
+
+
     window.addEventListener('click', (e) => {
+
       if (e.target.tagName !== 'INPUT' && e.target.tagName !== 'BUTTON' && !btnAction.disabled) {
+
         btnAction.click();
+
       }
+
     });
+
   </script>
+
 </body>
+
 </html>
+
