@@ -91,20 +91,34 @@ POSIZIONI:
 - 3-WAY (3 giocatori attivi): Hero 1 BB = BB. Hero 0.5 BB = SB. Hero 0 BB prima di agire = BTN.
 
 STRATEGIA GTO PRE-FLOP:
-1. CONTRO ALL-IN AVVERSARIO (valuta SEMPRE lo STACK EFFETTIVO di chi shova):
-   - SE ALL-IN <= 4 BB: CALL larghissimo per pot odds. CALL con qualsiasi Asso (Ax), qualsiasi Kx, Qx decenti (Q5+), connettori medi/alti (J8+, T8+, 98s, T9), tutte le coppie (22+). FOLD solo trash totale (72o, 83o, 42o).
-   - SE ALL-IN 5 - 9 BB: CALL con tutte le coppie (22+), A2s+, A7o+, Broadway forti (KTs+, KJo+, QJs). FOLD il resto.
-   - SE ALL-IN >= 10 BB: CALL solo con monster: JJ+, QQ, KK, AA, AKs, AKo (e AQs a 10-12 BB). FOLD il resto.
-2. CONTRO LIMP (piatto aperto da 1 BB prima di Hero):
-   - Se stack effettivo limper <= 10 BB: MAI rilanciare a 2x-3x. Solo ALL-IN diretto con valore (Ax forti, Broadway, coppie 22+). FOLD o CHECK su trash.
+1. CONTRO ALL-IN AVVERSARIO:
+   A) SE HEADS-UP oppure se Hero è sul BIG BLIND (chiude l'azione):
+      - ALL-IN <= 4 BB: CALL larghissimo per pot odds con qualsiasi Asso, Kx, Qx decenti, connettori medi/alti (T8+, 98s, T9), coppie (22+). Fold solo trash disconnesso offsuit (72o, 83o, 42o).
+      - ALL-IN 5 - 9 BB: CALL con tutte le coppie (22+), A2s+, A7o+, Broadway forti (KTs+, KJo+, QJs).
+      - ALL-IN >= 10 BB: CALL solo con monster: JJ+, QQ, KK, AA, AKs, AKo (e AQs a 10-12 BB).
+   B) SE 3-WAY E HERO E' SULLO SMALL BLIND (con il BB ancora attivo dietro):
+      - MAI fare flat CALL su shove di BTN (regala pot odds al BB).
+      - Fai RE-SHOVE (ALL-IN) per isolare solo con mani solide: coppie medie/alte (55+), Ax forti (A8o+, A2s+), Broadway (KQ, KJ).
+      - FOLD con coppiette minime (22-44), assi dominati (A2o-A7o) e connettori per non finire stritolati in multiway.
+
+2. CONTRO MIN-RAISE / APERTURA 2x-2.5x:
+   - SE HERO E' BB E HA STACK <= 6 BB: Pot odds altissime (costa 1 BB). MAI foldare suited connectors (54s, 65s), assi, Kx, Qx o coppie. Con coppie/Ax forti fai ALL-IN diretto; con suited connectors fai CALL. FOLD solo spazzatura disconnessa offsuit.
+   - SE HERO HA STACK > 6 BB: Re-shove (ALL-IN) con Ax forti, coppie 22+, Broadway; CALL con suited connectors e broadway medie; FOLD trash.
+
+3. CONTRO LIMP (piatto aperto da 1 BB prima di Hero):
+   - Se stack effettivo limper <= 10 BB: 
+       * ALL-IN diretto SOLO con valore vero: coppie (22+), Ax forti (A7o+, A2s+), Broadway (KTo+, QJo+).
+       * CHECK obbligatorio su BB con Ax deboli offsuit (A2o-A6o), Kx medi, suited gappers e mani marginali (prendi il flop gratis, non rischiare lo stack contro trap o coppie).
+       * FOLD o CHECK su trash. MAI min-raise 2x-3x.
    - Se stack limper > 10 BB: ISO-Raise 3 BB in posizione, 3.5 BB da SB.
-3. PIATTO NON APERTO (nessun rilancio/limp prima di Hero):
+
+4. PIATTO NON APERTO (nessun rilancio/limp prima di Hero):
    - Se stack effettivo <= 8 BB: Solo Push o Fold. Shove con Ax, Broadway, coppie, Kx forti. Fold trash.
    - Se stack effettivo > 8 BB: Raise 2 BB con range GTO solido. Fold trash.
 
 STRATEGIA POST-FLOP (RIGIDA):
 1. CONTRO PUNTATA AVVERSARIA:
-   - Se bet >= pot (overbet o grossa puntata): FOLD immediato con tutti i progetti semplici (scala bilaterale, incastro, colore). CALL o RAISE solo con Top Pair forte (buon kicker), doppia coppia, set o punto già completato.
+   - Se bet >= pot (overbet o grossa puntata): FOLD immediato con progetti semplici (scala bilaterale, incastro, colore). CALL o RAISE solo con Top Pair forte, doppia coppia, set o punto già chiuso.
    - A stack corto (<= 8 BB residui): MAI fare CALL passivo con soli draw se la puntata impegna piu' del 30% del tuo stack rimanente. O è ALL-IN diretto (se monster draw 12+ out), altrimenti FOLD secco.
    - Se Hero ha aria totale (nessuna coppia e nessun progetto solido): FOLD immediato su qualsiasi bet.
 2. TURN E RIVER:
