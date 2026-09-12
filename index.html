@@ -151,12 +151,19 @@ STRATEGIA POST-FLOP (RIGIDA):
        * Qualsiasi progetto solido (scala bilaterale, colore, o gutshot + overcard).
        * Board dry con Asso o Re (anche se Hero non ha legato nulla).
    - CHECK al flop solo con mani totalmente disconnesse e nessun draw su board coordinato.
-2. CONTRO PUNTATA AVVERSARIA AL FLOP:
-   - SE HERO È IN POSIZIONE (ha aperto pre-flop) contro min-bet (<= 1.5 BB): CALL con Asso alto (Ax) o overcards pulite.
-   - SE HERO È FUORI POSIZIONE (es: da BB in piatto limped): FOLD immediato su qualsiasi bet se hai solo carta alta (es: Qx, Jx, Kx deboli senza Asso e senza draw). NON fare floating passivo fuori posizione senza progetto reale!
-   - Se bet >= pot (overbet o grossa puntata): FOLD immediato con progetti semplici. CALL o RAISE solo con Top Pair forte, doppia coppia, set o punto già completato.
+
+2. REGOLA BOARD ALTAMENTE PERICOLOSO (4 CARTE DI SCALA O 4 A COLORE AL TURN/RIVER):
+   - Se il board presenta 4 carte connesse (es: 6-7-8-T, dove qualsiasi 9 o 4 chiude scala) o 4 carte dello stesso seme:
+       * OVERPAIR (AA, KK, QQ) E TOP PAIR DEGRADANO A BLUFF CATCHER / CARTA ALTA!
+       * Contro ALL-IN, rilanci o puntate consistenti (>= 50% pot) dell'avversario: FOLD CATEGORICO con semplici coppie o overpair. Non chiamare mai con una sola coppia quando una singola carta chiude scala o colore a mezzo mazzo avversario!
+
+3. CONTRO PUNTATA AVVERSARIA GENERALE:
+   - SE HERO È IN POSIZIONE contro min-bet (<= 1.5 BB): CALL con Asso alto (Ax) o overcards pulite.
+   - SE HERO È FUORI POSIZIONE (es: da BB in piatto limped): FOLD immediato su qualsiasi bet se hai solo carta alta (Qx, Jx, Kx deboli). NON fare floating passivo senza progetto reale!
+   - Se bet >= pot (overbet o grossa puntata su board non compromesso): FOLD con progetti semplici. CALL o RAISE con Top Pair forte con kicker dominante, doppia coppia o set.
    - A stack corto (<= 8 BB residui): MAI fare CALL passivo con soli draw se la puntata impegna piu' del 30% dello stack residuo. O e' ALL-IN diretto (se monster draw 12+ out), altrimenti FOLD secco.
-3. TURN E RIVER:
+
+4. TURN E RIVER:
    - Se la carta al Turn/River non migliora Hero e si ha solo carta alta / coppia debole: CHECK/FOLD su puntata. MAI andare all-in in donk-bet senza punto fatto o draw nuts.
 
 Rispondi SOLO con un JSON valido con questo formato:
