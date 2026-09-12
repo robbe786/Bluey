@@ -116,13 +116,13 @@ L'utente ti indicherà esplicitamente la modalità attiva:
    - Chi mette 1 BB e' BB. Chi mette 0.5 BB e' SB. Chi non ha bui prima dell'azione e' BTN.
 
 REGOLA STACK EFFETTIVO:
-Lo stack effettivo da considerare e' SEMPRE il MINIMO tra lo stack di Hero e quello dell'avversario. Se Hero ha 3.5 BB e oppo shova 10 BB, lo stack effettivo e' 3.5 BB!
+Lo stack effettivo da considerare e' SEMPRE il MINIMO tra lo stack di Hero e quello dell'avversario. Se Hero ha 315 chip con bui 30/60, lo stack e' 5.25 BB (quindi rientra nella fascia 5-9 BB, NON in quella <= 4 BB!).
 
 STRATEGIA GTO PRE-FLOP:
 1. CONTRO ALL-IN AVVERSARIO:
    A) IN HEADS-UP oppure da BIG BLIND (quando chiude l'azione):
       - STACK EFFETTIVO <= 4 BB: CALL larghissimo per pot odds. CALL con qualsiasi Asso (Ax), qualsiasi Re (Kx), Qx (Q2+), tutti i Broadway (QJ, JT, QT, KT offsuit e suited), tutti i connettori medi (T9, 98, 87, J9, T8) e TUTTE le coppie (22+). FOLD solo spazzatura disconnessa offsuit totale (es: 72o, 83o, 62o, 52o, 42o).
-      - STACK EFFETTIVO 5 - 9 BB: CALL con tutte le coppie (22+), A2s+, A7o+, Broadway forti (KTs+, KJo+, QJs, JTs). FOLD il resto.
+      - STACK EFFETTIVO 5 - 9 BB: CALL con tutte le coppie (22+), tutti gli assi suited (A2s+), Ax offsuit (A5o+), TUTTI i Broadway sia suited che offsuit (KT, KJ, KQ, QJ, QT, JT sia offsuit che suited), K9s+, e SOLO connettori suited alti (87s+, 98s+, T9s). FOLD CATEGORICO con connettori/gapper bassi (75s, 76s, 65s, 54s), K8o-, Q8o-, J8o- e spazzatura disconnessa.
       - STACK EFFETTIVO >= 10 BB: CALL solo con monster: JJ+, QQ, KK, AA, AKs, AKo (e AQs a 10-12 BB).
    B) IN 3-WAY DA SMALL BLIND (con BB ancora attivo dietro):
       - MAI fare flat CALL su shove di BTN (regala pot odds al BB).
@@ -151,10 +151,11 @@ STRATEGIA POST-FLOP (RIGIDA):
        * Qualsiasi progetto solido (scala bilaterale, colore, o gutshot + overcard).
        * Board dry con Asso o Re (anche se Hero non ha legato nulla).
    - CHECK al flop solo con mani totalmente disconnesse e nessun draw su board coordinato.
-2. CONTRO PUNTATA AVVERSARIA:
+2. CONTRO PUNTATA AVVERSARIA AL FLOP:
+   - SE HERO È IN POSIZIONE (ha aperto pre-flop) contro min-bet (<= 1.5 BB): CALL con Asso alto (Ax) o overcards pulite.
+   - SE HERO È FUORI POSIZIONE (es: da BB in piatto limped): FOLD immediato su qualsiasi bet se hai solo carta alta (es: Qx, Jx, Kx deboli senza Asso e senza draw). NON fare floating passivo fuori posizione senza progetto reale!
    - Se bet >= pot (overbet o grossa puntata): FOLD immediato con progetti semplici. CALL o RAISE solo con Top Pair forte, doppia coppia, set o punto già completato.
    - A stack corto (<= 8 BB residui): MAI fare CALL passivo con soli draw se la puntata impegna piu' del 30% dello stack residuo. O e' ALL-IN diretto (se monster draw 12+ out), altrimenti FOLD secco.
-   - Se Hero ha aria totale (nessuna coppia e nessun progetto solido): FOLD immediato su qualsiasi puntata.
 3. TURN E RIVER:
    - Se la carta al Turn/River non migliora Hero e si ha solo carta alta / coppia debole: CHECK/FOLD su puntata. MAI andare all-in in donk-bet senza punto fatto o draw nuts.
 
@@ -174,9 +175,8 @@ Rispondi SOLO con un JSON valido con questo formato:
     let apiKey = localStorage.getItem('GEMINI_API_KEY') || '';
     let isHeadsUp = false;
 
-    // GESTIONE SELETTORE 3-WAY / HEADS-UP
     btnModeToggle.onclick = (e) => {
-      e.stopPropagation(); // Evita di far scattare la foto cliccando sullo schermo
+      e.stopPropagation();
       isHeadsUp = !isHeadsUp;
       if (isHeadsUp) {
         btnModeToggle.innerText = "TAVOLO: HEADS-UP (2 GIOCATORI)";
@@ -365,7 +365,6 @@ Rispondi SOLO con un JSON valido con questo formato:
       }
     });
 
-    // Cliccando sullo schermo scatta la foto, a meno che non si prema il toggle HU/3-Way o input modale
     window.addEventListener('click', (e) => {
       if (
         e.target.id !== 'btn-mode-toggle' && 
