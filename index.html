@@ -21,10 +21,31 @@
       box-shadow: 0 0 0 9999px rgba(0,0,0,0.6); 
     }
 
-    #result-panel { flex: 0 0 auto; background: #1a1a1a; padding: 12px 16px 20px 16px; display: flex; flex-direction: column; align-items: center; gap: 10px; border-top: 2px solid #333; }
+    #result-panel { flex: 0 0 auto; background: #1a1a1a; padding: 10px 16px 18px 16px; display: flex; flex-direction: column; align-items: center; gap: 8px; border-top: 2px solid #333; }
     #decision { font-size: 1.8rem; font-weight: 900; text-align: center; letter-spacing: 1px; color: #888; }
-    #details { font-size: 0.9rem; color: #ccc; width: 100%; text-align: left; line-height: 1.45; min-height: 2.8em; word-break: break-word; }
-    #btn-action { width: 100%; padding: 16px; font-size: 1.2rem; font-weight: bold; color: white; background: #2563eb; border: none; border-radius: 12px; cursor: pointer; touch-action: manipulation; }
+    #details { font-size: 0.9rem; color: #ccc; width: 100%; text-align: left; line-height: 1.4; min-height: 2.6em; word-break: break-word; }
+
+    /* SELETTORE MANUALE 3-WAY / HEADS-UP */
+    #btn-mode-toggle {
+      width: 100%;
+      padding: 10px;
+      font-size: 0.95rem;
+      font-weight: 800;
+      border: 2px solid #444;
+      border-radius: 8px;
+      cursor: pointer;
+      touch-action: manipulation;
+      background-color: #27272a;
+      color: #38bdf8;
+      transition: all 0.15s ease;
+    }
+    #btn-mode-toggle.mode-hu {
+      background-color: #7c2d12;
+      border-color: #f97316;
+      color: #ffedd5;
+    }
+
+    #btn-action { width: 100%; padding: 15px; font-size: 1.2rem; font-weight: bold; color: white; background: #2563eb; border: none; border-radius: 12px; cursor: pointer; touch-action: manipulation; }
     #btn-action:active { background: #1d4ed8; }
     #btn-action:disabled { background: #444; color: #888; cursor: not-allowed; }
 
@@ -71,6 +92,7 @@
   <div id="result-panel">
     <div id="decision">IN ATTESA</div>
     <div id="details">Inquadra il tavolo nel riquadro panoramico.</div>
+    <button id="btn-mode-toggle" type="button">TAVOLO: 3-WAY (3 GIOCATORI)</button>
     <button id="btn-action">SCATTA E DECIDI</button>
   </div>
 
@@ -86,22 +108,25 @@ REGOLE SEMI (MAZZO A 4 COLORI):
 - CUORI (h): ROSSO VIVO (cuore).
 Non confondere MAI Fiori (verde) con Picche (nero).
 
-POSIZIONI:
-- HEADS-UP (2 giocatori rimasti): Chi mette 0.5 BB (o prima azione) e' BTN/SB. Chi mette 1 BB e' BB.
-- 3-WAY (3 giocatori attivi): Hero 1 BB = BB. Hero 0.5 BB = SB. Hero 0 BB prima di agire = BTN.
+GESTIONE POSIZIONI E FORMATO:
+L'utente ti indicherà esplicitamente la modalità attiva:
+1. SE MODALITÀ HEADS-UP (2 giocatori):
+   - Chi mette 0.5 BB (o agisce per primo pre-flop) e' BTN/SB. Chi mette 1 BB e' BB.
+2. SE MODALITÀ 3-WAY (3 giocatori):
+   - Chi mette 1 BB e' BB. Chi mette 0.5 BB e' SB. Chi non ha bui prima dell'azione e' BTN.
 
 REGOLA STACK EFFETTIVO:
 Lo stack effettivo da considerare e' SEMPRE il MINIMO tra lo stack di Hero e quello dell'avversario. Se Hero ha 3.5 BB e oppo shova 10 BB, lo stack effettivo e' 3.5 BB!
 
 STRATEGIA GTO PRE-FLOP:
 1. CONTRO ALL-IN AVVERSARIO:
-   A) SE HEADS-UP oppure se Hero e' sul BIG BLIND (chiude l'azione):
-      - STACK EFFETTIVO <= 4 BB: CALL larghissimo per pot odds (bastano ~35% di equity). CALL con qualsiasi Asso (Ax), qualsiasi Re (Kx), Qx (Q2+), tutti i Broadway (QJ, JT, QT, KT offsuit e suited), tutti i connettori medi (T9, 98, 87, J9, T8) e TUTTE le coppie (22+). FOLD solo spazzatura disconnessa offsuit totale (es: 72o, 83o, 62o, 52o, 42o).
+   A) IN HEADS-UP oppure da BIG BLIND (quando chiude l'azione):
+      - STACK EFFETTIVO <= 4 BB: CALL larghissimo per pot odds. CALL con qualsiasi Asso (Ax), qualsiasi Re (Kx), Qx (Q2+), tutti i Broadway (QJ, JT, QT, KT offsuit e suited), tutti i connettori medi (T9, 98, 87, J9, T8) e TUTTE le coppie (22+). FOLD solo spazzatura disconnessa offsuit totale (es: 72o, 83o, 62o, 52o, 42o).
       - STACK EFFETTIVO 5 - 9 BB: CALL con tutte le coppie (22+), A2s+, A7o+, Broadway forti (KTs+, KJo+, QJs, JTs). FOLD il resto.
       - STACK EFFETTIVO >= 10 BB: CALL solo con monster: JJ+, QQ, KK, AA, AKs, AKo (e AQs a 10-12 BB).
-   B) SE 3-WAY E HERO E' SULLO SMALL BLIND (con il BB ancora attivo dietro):
+   B) IN 3-WAY DA SMALL BLIND (con BB ancora attivo dietro):
       - MAI fare flat CALL su shove di BTN (regala pot odds al BB).
-      - Fai RE-SHOVE (ALL-IN) per isolare solo con mani solide: coppie medie/alte (55+), Ax forti (A8o+, A2s+), Broadway (KQ, KJ).
+      - RE-SHOVE (ALL-IN) per isolare solo con mani solide: coppie medie/alte (55+), Ax forti (A8o+, A2s+), Broadway (KQ, KJ).
       - FOLD con coppiette minime (22-44), assi dominati (A2o-A7o) e connettori per non finire stritolati in multiway.
 
 2. CONTRO MIN-RAISE / APERTURA 2x-2.5x:
@@ -139,6 +164,7 @@ Rispondi SOLO con un JSON valido con questo formato:
     const video = document.getElementById('video');
     const canvas = document.getElementById('canvas');
     const btnAction = document.getElementById('btn-action');
+    const btnModeToggle = document.getElementById('btn-mode-toggle');
     const decisionEl = document.getElementById('decision');
     const detailsEl = document.getElementById('details');
     const apiModal = document.getElementById('api-modal');
@@ -146,6 +172,20 @@ Rispondi SOLO con un JSON valido con questo formato:
     const saveKeyBtn = document.getElementById('save-key-btn');
 
     let apiKey = localStorage.getItem('GEMINI_API_KEY') || '';
+    let isHeadsUp = false;
+
+    // GESTIONE SELETTORE 3-WAY / HEADS-UP
+    btnModeToggle.onclick = (e) => {
+      e.stopPropagation(); // Evita di far scattare la foto cliccando sullo schermo
+      isHeadsUp = !isHeadsUp;
+      if (isHeadsUp) {
+        btnModeToggle.innerText = "TAVOLO: HEADS-UP (2 GIOCATORI)";
+        btnModeToggle.className = "mode-hu";
+      } else {
+        btnModeToggle.innerText = "TAVOLO: 3-WAY (3 GIOCATORI)";
+        btnModeToggle.className = "";
+      }
+    };
 
     if (apiKey) {
       apiModal.style.display = 'none';
@@ -214,7 +254,6 @@ Rispondi SOLO con un JSON valido con questo formato:
         const srcWidth = video.videoWidth;
         const srcHeight = video.videoHeight;
 
-        // GEOMETRIA FISSA DEL TREPPIEDE (40% altezza, 96% larghezza)
         const cropW = srcWidth * 0.96;
         const cropH = srcHeight * 0.40;
         const cropX = (srcWidth - cropW) / 2;
@@ -234,6 +273,8 @@ Rispondi SOLO con un JSON valido con questo formato:
 
         btnAction.innerText = "ANALISI AI...";
 
+        const modalitaStr = isHeadsUp ? "MODALITÀ ATTIVA: HEADS-UP (2 giocatori rimasti al tavolo)." : "MODALITÀ ATTIVA: 3-WAY (3 giocatori presenti al tavolo).";
+
         const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-3.6-flash:generateContent?key=${apiKey}`, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
@@ -241,7 +282,7 @@ Rispondi SOLO con un JSON valido con questo formato:
             contents: [{
               role: "user",
               parts: [
-                { text: SYSTEM_PROMPT + "\n\nIdentifica le carte di Hero, la posizione, calcola lo stack effettivo e dai la mossa ottimale." },
+                { text: `${SYSTEM_PROMPT}\n\n${modalitaStr}\nIdentifica le carte di Hero, la posizione, calcola lo stack effettivo e dai la mossa ottimale.` },
                 { inlineData: { mimeType: "image/jpeg", data: base64Image } }
               ]
             }],
@@ -267,7 +308,6 @@ Rispondi SOLO con un JSON valido con questo formato:
 
         let rawText = candidate.content.parts[0].text.trim();
 
-        // Estrazione sicura del blocco { ... }
         const start = rawText.indexOf('{');
         const end = rawText.lastIndexOf('}');
         
@@ -325,8 +365,14 @@ Rispondi SOLO con un JSON valido con questo formato:
       }
     });
 
+    // Cliccando sullo schermo scatta la foto, a meno che non si prema il toggle HU/3-Way o input modale
     window.addEventListener('click', (e) => {
-      if (e.target.tagName !== 'INPUT' && e.target.tagName !== 'BUTTON' && !btnAction.disabled) {
+      if (
+        e.target.id !== 'btn-mode-toggle' && 
+        e.target.tagName !== 'INPUT' && 
+        e.target.tagName !== 'BUTTON' && 
+        !btnAction.disabled
+      ) {
         btnAction.click();
       }
     });
