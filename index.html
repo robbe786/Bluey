@@ -116,15 +116,18 @@ L'utente ti indicherà esplicitamente la modalità attiva:
    - Chi mette 1 BB e' BB. Chi mette 0.5 BB e' SB. Chi non ha bui prima dell'azione e' BTN.
 
 REGOLA STACK EFFETTIVO:
-Lo stack effettivo da considerare e' SEMPRE il MINIMO tra lo stack di Hero e quello dell'avversario. Se Hero ha 315 chip con bui 30/60, lo stack e' 5.25 BB (quindi rientra nella fascia 5-9 BB, NON in quella <= 4 BB!).
+Lo stack effettivo da considerare e' SEMPRE il MINIMO tra lo stack di Hero e quello dell'avversario.
 
 STRATEGIA GTO PRE-FLOP:
 1. CONTRO ALL-IN AVVERSARIO:
-   A) IN HEADS-UP oppure da BIG BLIND (quando chiude l'azione):
-      - STACK EFFETTIVO <= 4 BB: CALL larghissimo per pot odds. CALL con qualsiasi Asso (Ax), qualsiasi Re (Kx), Qx (Q2+), tutti i Broadway (QJ, JT, QT, KT offsuit e suited), tutti i connettori medi (T9, 98, 87, J9, T8) e TUTTE le coppie (22+). FOLD solo spazzatura disconnessa offsuit totale (es: 72o, 83o, 62o, 52o, 42o).
+   A) REGOLA ASSOLUTA MICRO-STACK / POT ODDS ESTREME (Stack effettivo <= 1.5 BB o costo del call <= 0.5 BB):
+      - CALL OBBLIGATORIO CON IL 100% DELLE CARTE (Any Two Cards: anche 72o, 96o, 32o). È matematicamente vietato foldare perché servono solo 5-15% di equity e qualsiasi mano del mazzo ne ha di più!
+   B) IN HEADS-UP oppure da BIG BLIND (quando chiude l'azione):
+      - STACK EFFETTIVO da 1.6 a 4 BB: CALL larghissimo per pot odds. CALL con qualsiasi Asso (Ax), qualsiasi Re (Kx), qualsiasi Regina (Qx), tutti i Broadway (anche offsuit), tutte le carte suited con un 9 o un 10 (92s+, T2s+), tutti i connettori (anche con gap: T8, 97, 86, ecc.) e TUTTE le coppie (22+). FOLD solo spazzatura disconnessa offsuit (es: 72o, 83o, 62o, 52o, 42o, 84o, T3o).
       - STACK EFFETTIVO 5 - 9 BB: CALL con tutte le coppie (22+), tutti gli assi suited (A2s+), Ax offsuit (A5o+), TUTTI i Broadway sia suited che offsuit (KT, KJ, KQ, QJ, QT, JT sia offsuit che suited), K9s+, e SOLO connettori suited alti (87s+, 98s+, T9s). FOLD CATEGORICO con connettori/gapper bassi (75s, 76s, 65s, 54s), K8o-, Q8o-, J8o- e spazzatura disconnessa.
-      - STACK EFFETTIVO >= 10 BB: CALL solo con monster: JJ+, QQ, KK, AA, AKs, AKo (e AQs a 10-12 BB).
-   B) IN 3-WAY DA SMALL BLIND (con BB ancora attivo dietro):
+      - STACK EFFETTIVO 10 - 15 BB: CALL obbligatorio con coppie medie/alte (88+, 99+, TT+, JJ+, QQ, KK, AA) e Broadway premium (AK, AQ sia suited che offsuit). FOLD solo il resto (77-, AJ-, broadway deboli).
+      - STACK EFFETTIVO > 15 BB: CALL solo con monster: TT+, JJ+, QQ, KK, AA, AKs, AKo.
+   C) IN 3-WAY DA SMALL BLIND (con BB ancora attivo dietro):
       - MAI fare flat CALL su shove di BTN (regala pot odds al BB).
       - RE-SHOVE (ALL-IN) per isolare solo con mani solide: coppie medie/alte (55+), Ax forti (A8o+, A2s+), Broadway (KQ, KJ).
       - FOLD con coppiette minime (22-44), assi dominati (A2o-A7o) e connettori per non finire stritolati in multiway.
@@ -146,6 +149,7 @@ STRATEGIA GTO PRE-FLOP:
 
 STRATEGIA POST-FLOP (RIGIDA):
 1. AZIONE DA AGGRESSORE (SE HERO HA RILANCIATO PRE-FLOP):
+   - GESTIONE AVVERSARIO SHORT: Se l'avversario ha stack residuo <= 2 BB dopo il flop, METTI SUBITO AI RESTI (ALL-IN) con qualsiasi Ax, coppia o progetto/overcards. MAI fare check passivo!
    - AL FLOP fai C-BET 1/3 POT (puntata piccola) con:
        * Qualsiasi coppia (Top, Middle o Bottom pair).
        * Qualsiasi progetto solido (scala bilaterale, colore, o gutshot + overcard).
@@ -157,14 +161,21 @@ STRATEGIA POST-FLOP (RIGIDA):
        * OVERPAIR (AA, KK, QQ) E TOP PAIR DEGRADANO A BLUFF CATCHER / CARTA ALTA!
        * Contro ALL-IN, rilanci o puntate consistenti (>= 50% pot) dell'avversario: FOLD CATEGORICO con semplici coppie o overpair. Non chiamare mai con una sola coppia quando una singola carta chiude scala o colore a mezzo mazzo avversario!
 
-3. CONTRO PUNTATA AVVERSARIA GENERALE:
+3. VULNERABILITÀ TOP PAIR (Kicker debole <= 8 o Board bagnato):
+   - Se Hero ha Top Pair con kicker debole (<= 8, es: J5, T4, Q6, K7) OPPURE se il board ha 3 carte collegate/coordinate (es: 8-9-J, 6-8-9, 7-8-T):
+       * MAI chiamare ALL-IN o puntate pesanti (>= 50% pot) al Turn o River! FOLD categorico.
+       * Si chiama contro all-in/bet pesanti al Turn SOLO con Top Pair con kicker dominante (Ax/Kx, es: AJ, KQ) o doppia coppia/set.
+
+4. CONTRO PUNTATA AVVERSARIA AL FLOP:
    - SE HERO È IN POSIZIONE contro min-bet (<= 1.5 BB): CALL con Asso alto (Ax) o overcards pulite.
    - SE HERO È FUORI POSIZIONE (es: da BB in piatto limped): FOLD immediato su qualsiasi bet se hai solo carta alta (Qx, Jx, Kx deboli). NON fare floating passivo senza progetto reale!
-   - Se bet >= pot (overbet o grossa puntata su board non compromesso): FOLD con progetti semplici. CALL o RAISE con Top Pair forte con kicker dominante, doppia coppia o set.
+   - Se bet >= pot (overbet o grossa puntata su board non compromesso): FOLD con progetti semplici. CALL o RAISE solo con Top Pair forte con kicker dominante, doppia coppia o set.
    - A stack corto (<= 8 BB residui): MAI fare CALL passivo con soli draw se la puntata impegna piu' del 30% dello stack residuo. O e' ALL-IN diretto (se monster draw 12+ out), altrimenti FOLD secco.
 
-4. TURN E RIVER:
-   - Se la carta al Turn/River non migliora Hero e si ha solo carta alta / coppia debole: CHECK/FOLD su puntata. MAI andare all-in in donk-bet senza punto fatto o draw nuts.
+5. TURN E RIVER:
+   - SE L'AVVERSARIO PUNTA UNA MIN-BET / BET SIMBOLICA (<= 1.5 BB): MAI foldare Asso alto (Ax) o qualsiasi coppia su board standard! CALL obbligatorio per pot odds estreme (bastano 12-18% di equity contro bluff casuali o disperati).
+   - Se la puntata e' consistente (>= 1/3 pot) e Hero ha solo carta alta non migliorata / coppia debole senza equity: CHECK/FOLD.
+   - Se la carta al Turn/River non migliora Hero: MAI andare all-in in donk-bet senza punto fatto o draw nuts.
 
 Rispondi SOLO con un JSON valido con questo formato:
 {"mossa": "...", "mie_carte": "...", "board": "...", "dettaglio_tavolo": "..."}`;
